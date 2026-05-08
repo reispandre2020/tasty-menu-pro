@@ -120,6 +120,7 @@ function CheckoutPage() {
   // revisão
   const [coupon, setCoupon] = useState("");
   const [cpf, setCpf] = useState("");
+  const [linkCpf, setLinkCpf] = useState(false);
   const [notes, setNotes] = useState("");
 
   useEffect(() => {
