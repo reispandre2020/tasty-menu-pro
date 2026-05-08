@@ -9,38 +9,218 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as AdminLayoutRouteImport } from './routes/_adminLayout'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PedidoIdRouteImport } from './routes/pedido.$id'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminLayoutAdminIndexRouteImport } from './routes/_adminLayout.admin.index'
+import { Route as ApiConsumerOrdersRouteImport } from './routes/api/consumer/orders'
+import { Route as ApiConsumerMenuRouteImport } from './routes/api/consumer/menu'
+import { Route as AdminLayoutAdminProdutosRouteImport } from './routes/_adminLayout.admin.produtos'
+import { Route as AdminLayoutAdminConfiguracoesRouteImport } from './routes/_adminLayout.admin.configuracoes'
+import { Route as AdminLayoutAdminCategoriasRouteImport } from './routes/_adminLayout.admin.categorias'
+import { Route as ApiPublicOrdersIdRouteImport } from './routes/api/public/orders.$id'
+import { Route as ApiConsumerOrdersIdRouteImport } from './routes/api/consumer/orders.$id'
+import { Route as ApiConsumerOrdersIdStatusRouteImport } from './routes/api/consumer/orders.$id.status'
 
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLayoutRoute = AdminLayoutRouteImport.update({
+  id: '/_adminLayout',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PedidoIdRoute = PedidoIdRouteImport.update({
+  id: '/pedido/$id',
+  path: '/pedido/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLayoutAdminIndexRoute = AdminLayoutAdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => AdminLayoutRoute,
+} as any)
+const ApiConsumerOrdersRoute = ApiConsumerOrdersRouteImport.update({
+  id: '/api/consumer/orders',
+  path: '/api/consumer/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiConsumerMenuRoute = ApiConsumerMenuRouteImport.update({
+  id: '/api/consumer/menu',
+  path: '/api/consumer/menu',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLayoutAdminProdutosRoute =
+  AdminLayoutAdminProdutosRouteImport.update({
+    id: '/admin/produtos',
+    path: '/admin/produtos',
+    getParentRoute: () => AdminLayoutRoute,
+  } as any)
+const AdminLayoutAdminConfiguracoesRoute =
+  AdminLayoutAdminConfiguracoesRouteImport.update({
+    id: '/admin/configuracoes',
+    path: '/admin/configuracoes',
+    getParentRoute: () => AdminLayoutRoute,
+  } as any)
+const AdminLayoutAdminCategoriasRoute =
+  AdminLayoutAdminCategoriasRouteImport.update({
+    id: '/admin/categorias',
+    path: '/admin/categorias',
+    getParentRoute: () => AdminLayoutRoute,
+  } as any)
+const ApiPublicOrdersIdRoute = ApiPublicOrdersIdRouteImport.update({
+  id: '/api/public/orders/$id',
+  path: '/api/public/orders/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiConsumerOrdersIdRoute = ApiConsumerOrdersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiConsumerOrdersRoute,
+} as any)
+const ApiConsumerOrdersIdStatusRoute =
+  ApiConsumerOrdersIdStatusRouteImport.update({
+    id: '/status',
+    path: '/status',
+    getParentRoute: () => ApiConsumerOrdersIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/checkout': typeof CheckoutRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/pedido/$id': typeof PedidoIdRoute
+  '/admin/categorias': typeof AdminLayoutAdminCategoriasRoute
+  '/admin/configuracoes': typeof AdminLayoutAdminConfiguracoesRoute
+  '/admin/produtos': typeof AdminLayoutAdminProdutosRoute
+  '/api/consumer/menu': typeof ApiConsumerMenuRoute
+  '/api/consumer/orders': typeof ApiConsumerOrdersRouteWithChildren
+  '/admin/': typeof AdminLayoutAdminIndexRoute
+  '/api/consumer/orders/$id': typeof ApiConsumerOrdersIdRouteWithChildren
+  '/api/public/orders/$id': typeof ApiPublicOrdersIdRoute
+  '/api/consumer/orders/$id/status': typeof ApiConsumerOrdersIdStatusRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/checkout': typeof CheckoutRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/pedido/$id': typeof PedidoIdRoute
+  '/admin/categorias': typeof AdminLayoutAdminCategoriasRoute
+  '/admin/configuracoes': typeof AdminLayoutAdminConfiguracoesRoute
+  '/admin/produtos': typeof AdminLayoutAdminProdutosRoute
+  '/api/consumer/menu': typeof ApiConsumerMenuRoute
+  '/api/consumer/orders': typeof ApiConsumerOrdersRouteWithChildren
+  '/admin': typeof AdminLayoutAdminIndexRoute
+  '/api/consumer/orders/$id': typeof ApiConsumerOrdersIdRouteWithChildren
+  '/api/public/orders/$id': typeof ApiPublicOrdersIdRoute
+  '/api/consumer/orders/$id/status': typeof ApiConsumerOrdersIdStatusRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_adminLayout': typeof AdminLayoutRouteWithChildren
+  '/checkout': typeof CheckoutRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/pedido/$id': typeof PedidoIdRoute
+  '/_adminLayout/admin/categorias': typeof AdminLayoutAdminCategoriasRoute
+  '/_adminLayout/admin/configuracoes': typeof AdminLayoutAdminConfiguracoesRoute
+  '/_adminLayout/admin/produtos': typeof AdminLayoutAdminProdutosRoute
+  '/api/consumer/menu': typeof ApiConsumerMenuRoute
+  '/api/consumer/orders': typeof ApiConsumerOrdersRouteWithChildren
+  '/_adminLayout/admin/': typeof AdminLayoutAdminIndexRoute
+  '/api/consumer/orders/$id': typeof ApiConsumerOrdersIdRouteWithChildren
+  '/api/public/orders/$id': typeof ApiPublicOrdersIdRoute
+  '/api/consumer/orders/$id/status': typeof ApiConsumerOrdersIdStatusRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/checkout'
+    | '/admin/login'
+    | '/pedido/$id'
+    | '/admin/categorias'
+    | '/admin/configuracoes'
+    | '/admin/produtos'
+    | '/api/consumer/menu'
+    | '/api/consumer/orders'
+    | '/admin/'
+    | '/api/consumer/orders/$id'
+    | '/api/public/orders/$id'
+    | '/api/consumer/orders/$id/status'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/checkout'
+    | '/admin/login'
+    | '/pedido/$id'
+    | '/admin/categorias'
+    | '/admin/configuracoes'
+    | '/admin/produtos'
+    | '/api/consumer/menu'
+    | '/api/consumer/orders'
+    | '/admin'
+    | '/api/consumer/orders/$id'
+    | '/api/public/orders/$id'
+    | '/api/consumer/orders/$id/status'
+  id:
+    | '__root__'
+    | '/'
+    | '/_adminLayout'
+    | '/checkout'
+    | '/admin/login'
+    | '/pedido/$id'
+    | '/_adminLayout/admin/categorias'
+    | '/_adminLayout/admin/configuracoes'
+    | '/_adminLayout/admin/produtos'
+    | '/api/consumer/menu'
+    | '/api/consumer/orders'
+    | '/_adminLayout/admin/'
+    | '/api/consumer/orders/$id'
+    | '/api/public/orders/$id'
+    | '/api/consumer/orders/$id/status'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminLayoutRoute: typeof AdminLayoutRouteWithChildren
+  CheckoutRoute: typeof CheckoutRoute
+  AdminLoginRoute: typeof AdminLoginRoute
+  PedidoIdRoute: typeof PedidoIdRoute
+  ApiConsumerMenuRoute: typeof ApiConsumerMenuRoute
+  ApiConsumerOrdersRoute: typeof ApiConsumerOrdersRouteWithChildren
+  ApiPublicOrdersIdRoute: typeof ApiPublicOrdersIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_adminLayout': {
+      id: '/_adminLayout'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AdminLayoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +228,135 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pedido/$id': {
+      id: '/pedido/$id'
+      path: '/pedido/$id'
+      fullPath: '/pedido/$id'
+      preLoaderRoute: typeof PedidoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_adminLayout/admin/': {
+      id: '/_adminLayout/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminLayoutAdminIndexRouteImport
+      parentRoute: typeof AdminLayoutRoute
+    }
+    '/api/consumer/orders': {
+      id: '/api/consumer/orders'
+      path: '/api/consumer/orders'
+      fullPath: '/api/consumer/orders'
+      preLoaderRoute: typeof ApiConsumerOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/consumer/menu': {
+      id: '/api/consumer/menu'
+      path: '/api/consumer/menu'
+      fullPath: '/api/consumer/menu'
+      preLoaderRoute: typeof ApiConsumerMenuRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_adminLayout/admin/produtos': {
+      id: '/_adminLayout/admin/produtos'
+      path: '/admin/produtos'
+      fullPath: '/admin/produtos'
+      preLoaderRoute: typeof AdminLayoutAdminProdutosRouteImport
+      parentRoute: typeof AdminLayoutRoute
+    }
+    '/_adminLayout/admin/configuracoes': {
+      id: '/_adminLayout/admin/configuracoes'
+      path: '/admin/configuracoes'
+      fullPath: '/admin/configuracoes'
+      preLoaderRoute: typeof AdminLayoutAdminConfiguracoesRouteImport
+      parentRoute: typeof AdminLayoutRoute
+    }
+    '/_adminLayout/admin/categorias': {
+      id: '/_adminLayout/admin/categorias'
+      path: '/admin/categorias'
+      fullPath: '/admin/categorias'
+      preLoaderRoute: typeof AdminLayoutAdminCategoriasRouteImport
+      parentRoute: typeof AdminLayoutRoute
+    }
+    '/api/public/orders/$id': {
+      id: '/api/public/orders/$id'
+      path: '/api/public/orders/$id'
+      fullPath: '/api/public/orders/$id'
+      preLoaderRoute: typeof ApiPublicOrdersIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/consumer/orders/$id': {
+      id: '/api/consumer/orders/$id'
+      path: '/$id'
+      fullPath: '/api/consumer/orders/$id'
+      preLoaderRoute: typeof ApiConsumerOrdersIdRouteImport
+      parentRoute: typeof ApiConsumerOrdersRoute
+    }
+    '/api/consumer/orders/$id/status': {
+      id: '/api/consumer/orders/$id/status'
+      path: '/status'
+      fullPath: '/api/consumer/orders/$id/status'
+      preLoaderRoute: typeof ApiConsumerOrdersIdStatusRouteImport
+      parentRoute: typeof ApiConsumerOrdersIdRoute
+    }
   }
 }
 
+interface AdminLayoutRouteChildren {
+  AdminLayoutAdminCategoriasRoute: typeof AdminLayoutAdminCategoriasRoute
+  AdminLayoutAdminConfiguracoesRoute: typeof AdminLayoutAdminConfiguracoesRoute
+  AdminLayoutAdminProdutosRoute: typeof AdminLayoutAdminProdutosRoute
+  AdminLayoutAdminIndexRoute: typeof AdminLayoutAdminIndexRoute
+}
+
+const AdminLayoutRouteChildren: AdminLayoutRouteChildren = {
+  AdminLayoutAdminCategoriasRoute: AdminLayoutAdminCategoriasRoute,
+  AdminLayoutAdminConfiguracoesRoute: AdminLayoutAdminConfiguracoesRoute,
+  AdminLayoutAdminProdutosRoute: AdminLayoutAdminProdutosRoute,
+  AdminLayoutAdminIndexRoute: AdminLayoutAdminIndexRoute,
+}
+
+const AdminLayoutRouteWithChildren = AdminLayoutRoute._addFileChildren(
+  AdminLayoutRouteChildren,
+)
+
+interface ApiConsumerOrdersIdRouteChildren {
+  ApiConsumerOrdersIdStatusRoute: typeof ApiConsumerOrdersIdStatusRoute
+}
+
+const ApiConsumerOrdersIdRouteChildren: ApiConsumerOrdersIdRouteChildren = {
+  ApiConsumerOrdersIdStatusRoute: ApiConsumerOrdersIdStatusRoute,
+}
+
+const ApiConsumerOrdersIdRouteWithChildren =
+  ApiConsumerOrdersIdRoute._addFileChildren(ApiConsumerOrdersIdRouteChildren)
+
+interface ApiConsumerOrdersRouteChildren {
+  ApiConsumerOrdersIdRoute: typeof ApiConsumerOrdersIdRouteWithChildren
+}
+
+const ApiConsumerOrdersRouteChildren: ApiConsumerOrdersRouteChildren = {
+  ApiConsumerOrdersIdRoute: ApiConsumerOrdersIdRouteWithChildren,
+}
+
+const ApiConsumerOrdersRouteWithChildren =
+  ApiConsumerOrdersRoute._addFileChildren(ApiConsumerOrdersRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminLayoutRoute: AdminLayoutRouteWithChildren,
+  CheckoutRoute: CheckoutRoute,
+  AdminLoginRoute: AdminLoginRoute,
+  PedidoIdRoute: PedidoIdRoute,
+  ApiConsumerMenuRoute: ApiConsumerMenuRoute,
+  ApiConsumerOrdersRoute: ApiConsumerOrdersRouteWithChildren,
+  ApiPublicOrdersIdRoute: ApiPublicOrdersIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
