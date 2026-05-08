@@ -930,6 +930,8 @@ function ReviewStep(props: {
   notes: string;
   onCoupon: (v: string) => void;
   onCpf: (v: string) => void;
+  linkCpf: boolean;
+  onLinkCpf: (v: boolean) => void;
   onNotes: (v: string) => void;
   onApplyCoupon: () => void;
   onEditCart: () => void;
