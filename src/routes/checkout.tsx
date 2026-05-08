@@ -465,6 +465,8 @@ function CheckoutPage() {
               notes={notes}
               onCoupon={setCoupon}
               onCpf={setCpf}
+              linkCpf={linkCpf}
+              onLinkCpf={setLinkCpf}
               onNotes={setNotes}
               onApplyCoupon={() => toast.error("Cupom inválido")}
               onEditCart={() => nav({ to: "/" })}
