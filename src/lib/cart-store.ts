@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import type { Product } from "@/integrations/supabase/types";
+import type { Product } from "@/lib/menu-types";
 
 export interface CartItem {
   productId: string;
