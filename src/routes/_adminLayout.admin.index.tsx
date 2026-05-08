@@ -16,7 +16,7 @@ import {
 import { Loader2, Phone, MapPin, Hash } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_adminLayout/admin")({
+export const Route = createFileRoute("/_adminLayout/admin/")({
   component: OrdersBoard,
   head: () => ({ meta: [{ title: "Admin — Pedidos" }] }),
 });
