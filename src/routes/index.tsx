@@ -1,14 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { ShoppingBag, Plus, Minus, Trash2, Flame, Clock, MapPin } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ShoppingBag, Plus, Minus, Trash2, Clock, MapPin, Search, Phone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Category, Product, StoreSettings } from "@/lib/menu-types";
 import { brl } from "@/lib/format";
 import { cartStore, cartTotal, useCart } from "@/lib/cart-store";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from "@/components/ui/sheet";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
@@ -29,7 +28,9 @@ function MenuPage() {
   const [settings, setSettings] = useState<StoreSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeCat, setActiveCat] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
   const cart = useCart();
+  const tabsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     (async () => {
@@ -46,75 +47,165 @@ function MenuPage() {
     })();
   }, []);
 
+  // Observer para destacar a categoria visível na tab bar
+  useEffect(() => {
+    if (loading || categories.length === 0) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) {
+          const id = visible.target.id.replace("cat-", "");
+          setActiveCat(id);
+        }
+      },
+      { rootMargin: "-120px 0px -60% 0px", threshold: [0, 0.25, 0.5, 1] },
+    );
+    categories.forEach((c) => {
+      const el = document.getElementById(`cat-${c.id}`);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, [loading, categories]);
+
+  // Mantém o botão da categoria ativa visível na tab bar com scroll horizontal
+  useEffect(() => {
+    if (!activeCat || !tabsRef.current) return;
+    const btn = tabsRef.current.querySelector<HTMLElement>(`[data-cat-id="${activeCat}"]`);
+    if (btn) {
+      const left = btn.offsetLeft - tabsRef.current.clientWidth / 2 + btn.clientWidth / 2;
+      tabsRef.current.scrollTo({ left, behavior: "smooth" });
+    }
+  }, [activeCat]);
+
   const grouped = useMemo(() => {
+    const q = query.trim().toLowerCase();
     const map = new Map<string, Product[]>();
     for (const p of products) {
+      if (q && !`${p.name} ${p.description ?? ""}`.toLowerCase().includes(q)) continue;
       const list = map.get(p.category_id) ?? [];
       list.push(p);
       map.set(p.category_id, list);
     }
     return map;
-  }, [products]);
+  }, [products, query]);
 
   const itemCount = cart.items.reduce((a, i) => a + i.quantity, 0);
+  const storeName = settings?.store_name ?? "Burger House";
+  const initial = storeName.charAt(0).toUpperCase();
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* HERO */}
-      <header className="relative overflow-hidden bg-sidebar text-sidebar-foreground">
-        <div className="absolute inset-0 opacity-30 bg-gradient-to-br from-primary via-accent to-secondary" />
-        <div className="relative mx-auto max-w-6xl px-4 py-10 sm:py-14">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <Badge className="mb-3 bg-primary text-primary-foreground border-0">
-                <Flame className="mr-1 h-3 w-3" /> {settings?.is_open ? "Aberto agora" : "Fechado"}
-              </Badge>
-              <h1 className="text-4xl sm:text-6xl font-display tracking-tight">
-                {settings?.store_name ?? "Burger House"}
-              </h1>
-              <p className="mt-2 max-w-md text-sidebar-foreground/80">
-                Smash burgers, batatas crocantes e cervejas geladas. Peça e retire, receba em casa ou na sua mesa.
-              </p>
-              <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-sidebar-foreground/80">
-                {settings?.address && (
-                  <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" />{settings.address}</span>
-                )}
-                <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" />Pronto em ~25min</span>
-              </div>
+    <div className="min-h-screen bg-background pb-28">
+      {/* COVER */}
+      <header className="relative">
+        <div className="relative h-44 sm:h-56 overflow-hidden bg-sidebar">
+          <div
+            aria-hidden
+            className="absolute inset-0 opacity-90"
+            style={{
+              backgroundImage:
+                "radial-gradient(120% 80% at 20% 0%, color-mix(in oklab, var(--primary) 60%, transparent), transparent 60%), radial-gradient(80% 80% at 90% 100%, color-mix(in oklab, var(--accent) 60%, transparent), transparent 60%), linear-gradient(180deg, color-mix(in oklab, var(--sidebar) 75%, black) 0%, var(--sidebar) 100%)",
+            }}
+          />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,_rgba(255,255,255,0.06)_1px,_transparent_0)] [background-size:18px_18px]" />
+        </div>
+
+        {/* Logo + nome flutuando sobre o cover */}
+        <div className="relative -mt-12 sm:-mt-14 px-4">
+          <div className="mx-auto max-w-3xl flex flex-col items-center text-center">
+            <div className="grid h-24 w-24 sm:h-28 sm:w-28 place-items-center rounded-full border-4 border-background bg-gradient-to-br from-primary to-primary-glow text-primary-foreground shadow-xl">
+              <span className="font-display text-4xl sm:text-5xl leading-none">{initial}</span>
             </div>
-            <CartTrigger itemCount={itemCount} total={cartTotal(cart.items)} />
+            <h1 className="mt-3 text-2xl sm:text-3xl font-display tracking-tight">{storeName}</h1>
+            <span
+              className={cn(
+                "mt-2 inline-flex items-center gap-1.5 rounded-full px-3 py-0.5 text-xs font-semibold",
+                settings?.is_open
+                  ? "bg-success/15 text-success"
+                  : "bg-destructive/15 text-destructive",
+              )}
+            >
+              <span className={cn("h-1.5 w-1.5 rounded-full", settings?.is_open ? "bg-success" : "bg-destructive")} />
+              {settings?.is_open ? "Aberto" : "Fechado"}
+            </span>
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+              {settings?.address && (
+                <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" />{settings.address}</span>
+              )}
+              <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />~25min</span>
+              {settings?.phone && (
+                <span className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" />{settings.phone}</span>
+              )}
+            </div>
           </div>
         </div>
       </header>
 
-      {/* CATEGORIES TABS */}
-      <nav className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur">
-        <ScrollArea className="w-full">
-          <div className="mx-auto flex max-w-6xl gap-1 px-4 py-2">
-            {categories.map((c) => (
+      {/* SEARCH */}
+      <div className="mx-auto mt-6 max-w-3xl px-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar no cardápio…"
+            className="h-11 rounded-full border-border bg-card pl-10"
+          />
+        </div>
+      </div>
+
+      {/* CATEGORIES TABS — sticky, underline style */}
+      <nav className="sticky top-0 z-30 mt-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        <div
+          ref={tabsRef}
+          className="mx-auto flex max-w-3xl gap-1 overflow-x-auto px-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {categories.map((c) => {
+            const isActive = activeCat === c.id;
+            return (
               <button
                 key={c.id}
+                data-cat-id={c.id}
                 onClick={() => {
                   setActiveCat(c.id);
                   document.getElementById(`cat-${c.id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
                 }}
                 className={cn(
-                  "whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-                  activeCat === c.id
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                  "relative whitespace-nowrap px-3 py-3 text-sm font-medium transition-colors",
+                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 {c.name}
+                <span
+                  className={cn(
+                    "absolute inset-x-2 bottom-0 h-0.5 rounded-full transition-all",
+                    isActive ? "bg-primary scale-x-100" : "bg-transparent scale-x-0",
+                  )}
+                />
               </button>
-            ))}
-          </div>
-        </ScrollArea>
+            );
+          })}
+        </div>
       </nav>
 
       {/* PRODUCT LIST */}
-      <main className="mx-auto max-w-6xl px-4 py-8 pb-32">
-        {loading && <p className="text-muted-foreground">Carregando cardápio…</p>}
+      <main className="mx-auto max-w-3xl px-4 py-6">
+        {loading && (
+          <div className="space-y-3">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="flex animate-pulse gap-3 rounded-2xl border border-border bg-card p-3">
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-2/3 rounded bg-muted" />
+                  <div className="h-3 w-full rounded bg-muted" />
+                  <div className="h-3 w-1/2 rounded bg-muted" />
+                  <div className="h-5 w-20 rounded bg-muted" />
+                </div>
+                <div className="h-24 w-24 rounded-xl bg-muted" />
+              </div>
+            ))}
+          </div>
+        )}
         {!loading && categories.length === 0 && (
           <div className="rounded-xl border border-dashed p-8 text-center">
             <p className="text-muted-foreground">
@@ -122,23 +213,35 @@ function MenuPage() {
             </p>
           </div>
         )}
-        {categories.map((cat) => (
-          <section key={cat.id} id={`cat-${cat.id}`} className="mb-10 scroll-mt-20">
-            <h2 className="mb-4 text-2xl font-display tracking-tight">{cat.name}</h2>
-            {cat.description && <p className="mb-4 -mt-3 text-sm text-muted-foreground">{cat.description}</p>}
-            <div className="grid gap-3 sm:grid-cols-2">
-              {(grouped.get(cat.id) ?? []).map((p) => (
-                <ProductCard key={p.id} product={p} />
-              ))}
-            </div>
-          </section>
-        ))}
+        {!loading && categories.map((cat) => {
+          const items = grouped.get(cat.id) ?? [];
+          if (query && items.length === 0) return null;
+          return (
+            <section key={cat.id} id={`cat-${cat.id}`} className="mb-8 scroll-mt-16">
+              <div className="mb-3 flex items-baseline justify-between">
+                <h2 className="text-xl font-display tracking-tight">{cat.name}</h2>
+                <span className="text-xs text-muted-foreground">{items.length} {items.length === 1 ? "item" : "itens"}</span>
+              </div>
+              {cat.description && <p className="mb-3 -mt-2 text-sm text-muted-foreground">{cat.description}</p>}
+              <div className="flex flex-col gap-2">
+                {items.map((p) => <ProductCard key={p.id} product={p} />)}
+                {items.length === 0 && (
+                  <p className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+                    Em breve novos itens nesta categoria.
+                  </p>
+                )}
+              </div>
+            </section>
+          );
+        })}
       </main>
 
-      {/* MOBILE FLOATING CART */}
+      {/* FLOATING CART — sempre visível quando há itens */}
       {itemCount > 0 && (
-        <div className="fixed bottom-0 inset-x-0 z-40 border-t bg-card p-3 shadow-lg sm:hidden">
-          <CartTrigger itemCount={itemCount} total={cartTotal(cart.items)} fullWidth />
+        <div className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-card/95 p-3 shadow-[0_-8px_24px_-12px_rgba(0,0,0,0.2)] backdrop-blur">
+          <div className="mx-auto max-w-3xl">
+            <CartTrigger itemCount={itemCount} total={cartTotal(cart.items)} fullWidth />
+          </div>
         </div>
       )}
     </div>
@@ -146,23 +249,36 @@ function MenuPage() {
 }
 
 function ProductCard({ product }: { product: Product }) {
+  const inCart = useCart().items.find((i) => i.productId === product.id)?.quantity ?? 0;
   return (
-    <article className="group flex gap-3 rounded-2xl border bg-card p-3 transition-shadow hover:shadow-md">
-      <div className="flex-1 min-w-0">
-        <h3 className="font-semibold text-card-foreground">{product.name}</h3>
+    <article className="group flex gap-3 rounded-2xl border border-border bg-card p-3 transition-shadow hover:shadow-md">
+      <div className="flex flex-1 min-w-0 flex-col">
+        <h3 className="font-semibold text-card-foreground leading-tight">{product.name}</h3>
         {product.description && (
           <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{product.description}</p>
         )}
-        <div className="mt-3 flex items-center justify-between">
+        <div className="mt-auto pt-3 flex items-center justify-between">
           <span className="font-display text-lg text-primary">{brl(Number(product.price))}</span>
-          <Button size="sm" onClick={() => cartStore.add(product)}>
-            <Plus className="mr-1 h-4 w-4" /> Adicionar
-          </Button>
+          {inCart > 0 ? (
+            <div className="flex items-center gap-1">
+              <Button size="icon" variant="outline" className="h-8 w-8 rounded-full" onClick={() => cartStore.setQty(product.id, inCart - 1)} aria-label="Remover um">
+                <Minus className="h-3.5 w-3.5" />
+              </Button>
+              <span className="w-6 text-center text-sm font-semibold">{inCart}</span>
+              <Button size="icon" className="h-8 w-8 rounded-full" onClick={() => cartStore.add(product)} aria-label="Adicionar mais um">
+                <Plus className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          ) : (
+            <Button size="sm" className="rounded-full" onClick={() => cartStore.add(product)}>
+              <Plus className="mr-1 h-4 w-4" /> Adicionar
+            </Button>
+          )}
         </div>
       </div>
-      <div className="aspect-square h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-muted">
+      <div className="relative aspect-square h-24 w-24 sm:h-28 sm:w-28 shrink-0 overflow-hidden rounded-xl bg-muted">
         {product.image_url ? (
-          <img src={product.image_url} alt={product.name} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+          <img src={product.image_url} alt={product.name} loading="lazy" className="h-full w-full object-cover transition-transform group-hover:scale-105" />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-3xl">🍔</div>
         )}
@@ -176,7 +292,7 @@ function CartTrigger({ itemCount, total, fullWidth }: { itemCount: number; total
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button size="lg" className={cn("relative shadow-lg", fullWidth && "w-full")}>
+        <Button size="lg" className={cn("relative shadow-lg rounded-full", fullWidth && "w-full")}>
           <ShoppingBag className="mr-2 h-5 w-5" />
           {itemCount > 0 ? `${itemCount} item${itemCount > 1 ? "s" : ""} • ${brl(total)}` : "Meu pedido"}
         </Button>
