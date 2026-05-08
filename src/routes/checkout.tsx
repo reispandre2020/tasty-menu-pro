@@ -1029,12 +1029,20 @@ function ReviewStep(props: {
           />
           <Button variant="outline" onClick={props.onApplyCoupon}>APLICAR</Button>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Input
             placeholder="CPF / CNPJ"
             value={props.cpf}
             onChange={(e) => props.onCpf(e.target.value)}
+            className="flex-1"
           />
+          <label className="flex items-center gap-2 text-sm text-muted-foreground whitespace-nowrap cursor-pointer">
+            <Checkbox
+              checked={props.linkCpf}
+              onCheckedChange={(v) => props.onLinkCpf(Boolean(v))}
+            />
+            Vincular ao cadastro
+          </label>
         </div>
       </div>
 
