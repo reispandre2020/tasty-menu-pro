@@ -148,7 +148,7 @@ function MenuPage() {
               {settings?.phone && (
                 <span className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" />{settings.phone}</span>
               )}
-              <Link to="/sobre" className="font-semibold text-primary hover:underline">Ver mais</Link>
+              <StoreInfoDialog settings={settings} initial={initial} />
             </div>
           </div>
         </div>
@@ -433,4 +433,68 @@ function CategoriesDialog({ categories, onSelect }: { categories: Category[]; on
       </DialogContent>
     </Dialog>
   );
+}
+
+function StoreInfoDialog({ settings, initial }: { settings: StoreSettings | null; initial: string }) {
+  const name = settings?.store_name ?? "Loja";
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <button className="font-semibold text-primary hover:underline">Ver mais</button>
+      </DialogTrigger>
+      <DialogContent className="max-w-sm p-0 overflow-hidden gap-0">
+        <DialogHeader className="sr-only">
+          <DialogTitle>{name}</DialogTitle>
+          <DialogDescription>Informações da loja</DialogDescription>
+        </DialogHeader>
+        <div className="relative h-32 bg-gradient-to-br from-primary/40 to-accent/50">
+          <div className="absolute -bottom-8 left-1/2 grid h-16 w-16 -translate-x-1/2 place-items-center rounded-full border-4 border-background bg-gradient-to-br from-primary to-primary-glow text-primary-foreground font-display text-2xl">
+            {initial}
+          </div>
+        </div>
+        <div className="bg-primary/90 px-4 pb-4 pt-10 text-center text-primary-foreground">
+          <h2 className="font-display text-lg">{name}</h2>
+          <div className="mt-2 flex items-center justify-center gap-3 text-xs opacity-90">
+            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />~25min</span>
+            {settings?.min_order_value ? <span>• Mínimo {brl(Number(settings.min_order_value))}</span> : null}
+          </div>
+        </div>
+        <div className="max-h-[60vh] space-y-4 overflow-y-auto p-4 text-sm">
+          <InfoSection title="Opções de entrega">
+            <div className="grid grid-cols-3 gap-2 text-xs">
+              <InfoPill>Delivery</InfoPill>
+              <InfoPill>Retirada</InfoPill>
+              <InfoPill>Consumo no Local</InfoPill>
+            </div>
+          </InfoSection>
+          <InfoSection title="Horário de funcionamento">
+            <span className={cn(
+              "inline-flex rounded-full px-2 py-0.5 text-xs font-semibold",
+              settings?.is_open ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive",
+            )}>
+              {settings?.is_open ? "Aberto Agora" : "Fechado"}
+            </span>
+          </InfoSection>
+          {settings?.address && (
+            <InfoSection title="Endereço"><p className="text-muted-foreground">{settings.address}</p></InfoSection>
+          )}
+          {settings?.phone && (
+            <InfoSection title="Telefone"><p className="text-muted-foreground">{settings.phone}</p></InfoSection>
+          )}
+          <InfoSection title="Formas de Pagamento">
+            <div className="flex flex-wrap gap-2 text-xs">
+              <InfoPill>Dinheiro</InfoPill><InfoPill>Crédito</InfoPill><InfoPill>Débito</InfoPill><InfoPill>Pix</InfoPill>
+            </div>
+          </InfoSection>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function InfoSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return <div><h3 className="mb-2 font-semibold">{title}</h3>{children}</div>;
+}
+function InfoPill({ children }: { children: React.ReactNode }) {
+  return <span className="rounded-md border border-border px-2 py-1 text-center">{children}</span>;
 }
