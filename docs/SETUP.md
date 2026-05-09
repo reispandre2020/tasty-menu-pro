@@ -38,10 +38,10 @@ Endpoints expostos por este projeto (todos sob `/api/consumer/*`):
 
 | Método | Caminho | Função |
 |--------|---------|--------|
-| GET | `/api/consumer/menu` | Cardápio completo (categorias + produtos ativos) |
-| GET | `/api/consumer/orders?status=pending` | Polling de pedidos (Consumer puxa novos) |
-| GET | `/api/consumer/orders/:id` | Detalhes de um pedido |
-| PATCH | `/api/consumer/orders/:id/status` | Atualizar status do pedido |
+| GET | `/api/consumer/orders` | **Polling de eventos** (PLC/CFM/CAN/DSP/CON). Marca eventos como lidos automaticamente — passe `?ack=false` para dry-run. |
+| GET | `/api/consumer/orders/:id` | Detalhes do pedido no formato oficial (consulta) |
+| POST | `/api/consumer/orders/details` | Push de detalhes (chamado pelo Consumer após `ORDER_DETAILS_REQUESTED`). Body: `{ OrderId, EventCode, EventFull }` |
+| PATCH | `/api/consumer/orders/:id/status` | Atualizar status. Body: `{ orderId, status, justification? }`. Enums: `CONFIRMED`, `CANCELLED`, `READY_FOR_PICKUP`, `DISPATCHED`, `CONCLUDED` |
 
 **Autenticação:** Bearer token estático no header `Authorization: Bearer <CONSUMER_API_TOKEN>`.
 
