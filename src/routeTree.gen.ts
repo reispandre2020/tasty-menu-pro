@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as EntrarRouteImport } from './routes/entrar'
+import { Route as CuponsRouteImport } from './routes/cupons'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AdminLayoutRouteImport } from './routes/_adminLayout'
 import { Route as IndexRouteImport } from './routes/index'
@@ -24,6 +26,16 @@ import { Route as ApiPublicOrdersIdRouteImport } from './routes/api/public/order
 import { Route as ApiConsumerOrdersIdRouteImport } from './routes/api/consumer/orders.$id'
 import { Route as ApiConsumerOrdersIdStatusRouteImport } from './routes/api/consumer/orders.$id.status'
 
+const EntrarRoute = EntrarRouteImport.update({
+  id: '/entrar',
+  path: '/entrar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CuponsRoute = CuponsRouteImport.update({
+  id: '/cupons',
+  path: '/cupons',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CheckoutRoute = CheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
@@ -101,6 +113,8 @@ const ApiConsumerOrdersIdStatusRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/checkout': typeof CheckoutRoute
+  '/cupons': typeof CuponsRoute
+  '/entrar': typeof EntrarRoute
   '/admin/login': typeof AdminLoginRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/admin/categorias': typeof AdminLayoutAdminCategoriasRoute
@@ -116,6 +130,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/checkout': typeof CheckoutRoute
+  '/cupons': typeof CuponsRoute
+  '/entrar': typeof EntrarRoute
   '/admin/login': typeof AdminLoginRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/admin/categorias': typeof AdminLayoutAdminCategoriasRoute
@@ -133,6 +149,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_adminLayout': typeof AdminLayoutRouteWithChildren
   '/checkout': typeof CheckoutRoute
+  '/cupons': typeof CuponsRoute
+  '/entrar': typeof EntrarRoute
   '/admin/login': typeof AdminLoginRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/_adminLayout/admin/categorias': typeof AdminLayoutAdminCategoriasRoute
@@ -150,6 +168,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/checkout'
+    | '/cupons'
+    | '/entrar'
     | '/admin/login'
     | '/pedido/$id'
     | '/admin/categorias'
@@ -165,6 +185,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/checkout'
+    | '/cupons'
+    | '/entrar'
     | '/admin/login'
     | '/pedido/$id'
     | '/admin/categorias'
@@ -181,6 +203,8 @@ export interface FileRouteTypes {
     | '/'
     | '/_adminLayout'
     | '/checkout'
+    | '/cupons'
+    | '/entrar'
     | '/admin/login'
     | '/pedido/$id'
     | '/_adminLayout/admin/categorias'
@@ -198,6 +222,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminLayoutRoute: typeof AdminLayoutRouteWithChildren
   CheckoutRoute: typeof CheckoutRoute
+  CuponsRoute: typeof CuponsRoute
+  EntrarRoute: typeof EntrarRoute
   AdminLoginRoute: typeof AdminLoginRoute
   PedidoIdRoute: typeof PedidoIdRoute
   ApiConsumerMenuRoute: typeof ApiConsumerMenuRoute
@@ -207,6 +233,20 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/entrar': {
+      id: '/entrar'
+      path: '/entrar'
+      fullPath: '/entrar'
+      preLoaderRoute: typeof EntrarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cupons': {
+      id: '/cupons'
+      path: '/cupons'
+      fullPath: '/cupons'
+      preLoaderRoute: typeof CuponsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/checkout': {
       id: '/checkout'
       path: '/checkout'
@@ -352,6 +392,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminLayoutRoute: AdminLayoutRouteWithChildren,
   CheckoutRoute: CheckoutRoute,
+  CuponsRoute: CuponsRoute,
+  EntrarRoute: EntrarRoute,
   AdminLoginRoute: AdminLoginRoute,
   PedidoIdRoute: PedidoIdRoute,
   ApiConsumerMenuRoute: ApiConsumerMenuRoute,
@@ -361,3 +403,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
