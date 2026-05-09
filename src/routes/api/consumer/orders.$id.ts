@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { checkConsumerAuth, CORS_HEADERS, isConsumerValidationOrderId } from "@/lib/consumer-auth.server";
-import { buildOrderDetails } from "@/lib/consumer-mappers.server";
+import { buildOrderDetails, getConsumerExternalCode } from "@/lib/consumer-mappers.server";
 import type { Order, OrderItem } from "@/lib/menu-types";
 
 // GET /api/consumer/orders/:id — detalhes do pedido no formato oficial Consumer
@@ -56,13 +56,13 @@ export const Route = createFileRoute("/api/consumer/orders/$id")({
         if (productIds.length > 0) {
           const { data: prods } = await supabaseAdmin
             .from("products")
-            .select("id, external_code")
+            .select("id, external_code, extra_fields")
             .in("id", productIds);
-          (prods ?? []).forEach((p) => productMap.set(p.id, p.external_code));
+          (prods ?? []).forEach((p) => productMap.set(p.id, getConsumerExternalCode(p)));
         }
         const itemsWithCode = (items as OrderItem[]).map((it) => ({
           ...it,
-          external_code: it.product_id ? productMap.get(it.product_id) ?? null : null,
+          external_code: it.product_id ? productMap.get(it.product_id) ?? "" : "",
         }));
 
         const merchant = {
