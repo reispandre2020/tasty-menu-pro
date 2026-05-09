@@ -25,17 +25,32 @@ function SettingsPage() {
   async function save() {
     if (!s) return;
     setSaving(true);
-    const { error } = await supabase.from("store_settings").update({
+    const payload = {
       store_name: s.store_name,
       phone: s.phone,
       address: s.address,
       delivery_fee: Number(s.delivery_fee),
       min_order_value: Number(s.min_order_value),
       is_open: s.is_open,
-      consumer_merchant_id: s.consumer_merchant_id,
-    }).eq("id", s.id);
+      consumer_merchant_id: s.consumer_merchant_id?.trim() || null,
+    };
+    const { data, error } = await supabase
+      .from("store_settings")
+      .update(payload)
+      .eq("id", s.id)
+      .select()
+      .maybeSingle();
     setSaving(false);
-    if (error) toast.error(error.message); else toast.success("Configurações salvas");
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    if (!data) {
+      toast.error("Nada foi salvo. Verifique se seu usuário tem o papel 'admin' (RLS bloqueou o update).");
+      return;
+    }
+    setS(data as StoreSettings);
+    toast.success("Configurações salvas");
   }
 
   if (!s) return <div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
