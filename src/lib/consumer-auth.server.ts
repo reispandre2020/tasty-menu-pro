@@ -52,7 +52,21 @@ export function checkConsumerAuth(request: Request): Response | null {
     // Log para diagnosticar o formato de auth que o Consumer está usando.
     // Não vaza o valor esperado, apenas o que chegou (truncado).
     const safeHeaders: Record<string, string> = {};
-    for (const h of ["authorization", "x-api-key", "x-access-token", "x-auth-token", "x-consumer-token", "api-key", "apikey", "token", "user-agent"]) {
+    for (const h of [
+      "authorization",
+      "x-api-key",
+      "xapikey",
+      "x-access-token",
+      "xaccesstoken",
+      "x-auth-token",
+      "xauthtoken",
+      "x-consumer-token",
+      "xconsumertoken",
+      "api-key",
+      "apikey",
+      "token",
+      "user-agent",
+    ]) {
       const v = request.headers.get(h);
       if (v) safeHeaders[h] = v.length > 12 ? `${v.slice(0, 6)}…${v.slice(-4)} (len=${v.length})` : `*** (len=${v.length})`;
     }
@@ -72,6 +86,7 @@ export function isConsumerValidationOrderId(orderId: string): boolean {
 
 export const CORS_HEADERS = {
   "access-control-allow-origin": "*",
-  "access-control-allow-methods": "GET,POST,PATCH,OPTIONS",
-  "access-control-allow-headers": "authorization,content-type,x-api-key,xapikey,x-access-token,xaccesstoken,x-auth-token,xauthtoken,x-consumer-token,xconsumertoken,api-key,apikey,token",
+  "access-control-allow-methods": "GET,POST,PATCH,PUT,OPTIONS",
+  "access-control-allow-headers": "authorization,content-type,accept,origin,x-requested-with,x-api-key,xapikey,x-access-token,xaccesstoken,x-auth-token,xauthtoken,x-consumer-token,xconsumertoken,api-key,apikey,token",
+  "access-control-max-age": "86400",
 };
