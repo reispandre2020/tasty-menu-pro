@@ -130,7 +130,7 @@ export const importProductsXlsx = createServerFn({ method: "POST" })
             errors.push({ row: i + 2, message: `Categoria: ${ins.error.message}` });
             continue;
           }
-          categoryId = ins.data.id;
+          categoryId = ins.data.id as string;
           catByName.set(categoryName.toLowerCase(), categoryId);
           created.push(`categoria: ${categoryName}`);
         }
