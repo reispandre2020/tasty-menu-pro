@@ -29,6 +29,7 @@ import { Route as ApiPublicOrdersIdRouteImport } from './routes/api/public/order
 import { Route as ApiConsumerOrdersDetailsRouteImport } from './routes/api/consumer/orders.details'
 import { Route as ApiConsumerOrdersIdRouteImport } from './routes/api/consumer/orders.$id'
 import { Route as ApiConsumerOrdersIdStatusRouteImport } from './routes/api/consumer/orders.$id.status'
+import { Route as ApiConsumerOrdersIdDetailsRouteImport } from './routes/api/consumer/orders.$id.details'
 
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
@@ -135,6 +136,12 @@ const ApiConsumerOrdersIdStatusRoute =
     path: '/status',
     getParentRoute: () => ApiConsumerOrdersIdRoute,
   } as any)
+const ApiConsumerOrdersIdDetailsRoute =
+  ApiConsumerOrdersIdDetailsRouteImport.update({
+    id: '/details',
+    path: '/details',
+    getParentRoute: () => ApiConsumerOrdersIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -155,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/api/consumer/orders/$id': typeof ApiConsumerOrdersIdRouteWithChildren
   '/api/consumer/orders/details': typeof ApiConsumerOrdersDetailsRoute
   '/api/public/orders/$id': typeof ApiPublicOrdersIdRoute
+  '/api/consumer/orders/$id/details': typeof ApiConsumerOrdersIdDetailsRoute
   '/api/consumer/orders/$id/status': typeof ApiConsumerOrdersIdStatusRoute
 }
 export interface FileRoutesByTo {
@@ -176,6 +184,7 @@ export interface FileRoutesByTo {
   '/api/consumer/orders/$id': typeof ApiConsumerOrdersIdRouteWithChildren
   '/api/consumer/orders/details': typeof ApiConsumerOrdersDetailsRoute
   '/api/public/orders/$id': typeof ApiPublicOrdersIdRoute
+  '/api/consumer/orders/$id/details': typeof ApiConsumerOrdersIdDetailsRoute
   '/api/consumer/orders/$id/status': typeof ApiConsumerOrdersIdStatusRoute
 }
 export interface FileRoutesById {
@@ -199,6 +208,7 @@ export interface FileRoutesById {
   '/api/consumer/orders/$id': typeof ApiConsumerOrdersIdRouteWithChildren
   '/api/consumer/orders/details': typeof ApiConsumerOrdersDetailsRoute
   '/api/public/orders/$id': typeof ApiPublicOrdersIdRoute
+  '/api/consumer/orders/$id/details': typeof ApiConsumerOrdersIdDetailsRoute
   '/api/consumer/orders/$id/status': typeof ApiConsumerOrdersIdStatusRoute
 }
 export interface FileRouteTypes {
@@ -222,6 +232,7 @@ export interface FileRouteTypes {
     | '/api/consumer/orders/$id'
     | '/api/consumer/orders/details'
     | '/api/public/orders/$id'
+    | '/api/consumer/orders/$id/details'
     | '/api/consumer/orders/$id/status'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -243,6 +254,7 @@ export interface FileRouteTypes {
     | '/api/consumer/orders/$id'
     | '/api/consumer/orders/details'
     | '/api/public/orders/$id'
+    | '/api/consumer/orders/$id/details'
     | '/api/consumer/orders/$id/status'
   id:
     | '__root__'
@@ -265,6 +277,7 @@ export interface FileRouteTypes {
     | '/api/consumer/orders/$id'
     | '/api/consumer/orders/details'
     | '/api/public/orders/$id'
+    | '/api/consumer/orders/$id/details'
     | '/api/consumer/orders/$id/status'
   fileRoutesById: FileRoutesById
 }
@@ -424,6 +437,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiConsumerOrdersIdStatusRouteImport
       parentRoute: typeof ApiConsumerOrdersIdRoute
     }
+    '/api/consumer/orders/$id/details': {
+      id: '/api/consumer/orders/$id/details'
+      path: '/details'
+      fullPath: '/api/consumer/orders/$id/details'
+      preLoaderRoute: typeof ApiConsumerOrdersIdDetailsRouteImport
+      parentRoute: typeof ApiConsumerOrdersIdRoute
+    }
   }
 }
 
@@ -448,10 +468,12 @@ const AdminLayoutRouteWithChildren = AdminLayoutRoute._addFileChildren(
 )
 
 interface ApiConsumerOrdersIdRouteChildren {
+  ApiConsumerOrdersIdDetailsRoute: typeof ApiConsumerOrdersIdDetailsRoute
   ApiConsumerOrdersIdStatusRoute: typeof ApiConsumerOrdersIdStatusRoute
 }
 
 const ApiConsumerOrdersIdRouteChildren: ApiConsumerOrdersIdRouteChildren = {
+  ApiConsumerOrdersIdDetailsRoute: ApiConsumerOrdersIdDetailsRoute,
   ApiConsumerOrdersIdStatusRoute: ApiConsumerOrdersIdStatusRoute,
 }
 
@@ -499,13 +521,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
