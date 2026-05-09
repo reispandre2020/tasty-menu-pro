@@ -145,11 +145,15 @@ export const importProductsXlsx = createServerFn({ method: "POST" })
             .select("id")
             .single();
           if (!ins.error) {
-            def = ins.data.id;
+            def = ins.data.id as string;
             catByName.set("geral", def);
           }
         }
-        categoryId = def!;
+        if (!def) {
+          errors.push({ row: i + 2, message: "Sem categoria padrão" });
+          continue;
+        }
+        categoryId = def;
       }
 
       const payload: Record<string, unknown> = {
