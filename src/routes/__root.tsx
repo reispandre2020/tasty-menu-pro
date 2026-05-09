@@ -73,14 +73,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "Smart Menu" },
+      { name: "description", content: "Seu melhor Cardapio Digital." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "Smart Menu" },
+      { property: "og:description", content: "Seu melhor Cardapio Digital." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Smart Menu" },
+      { name: "twitter:description", content: "Seu melhor Cardapio Digital." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/Xhuwzl8rFIT7icmFxSyn6izHf7j1/social-images/social-1778330903613-WhatsApp_Image_2026-05-09_at_09.47.35.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/Xhuwzl8rFIT7icmFxSyn6izHf7j1/social-images/social-1778330903613-WhatsApp_Image_2026-05-09_at_09.47.35.webp" },
     ],
     links: [
       {
