@@ -4,7 +4,7 @@ import { checkConsumerAuth, CORS_HEADERS, isConsumerValidationOrderId } from "@/
 import { buildOrderDetails, getConsumerExternalCode } from "@/lib/consumer-mappers.server";
 import type { Order, OrderItem } from "@/lib/menu-types";
 
-async function handleOrderDetails(request: Request, orderId: string): Promise<Response> {
+export async function handleOrderDetails(request: Request, orderId: string): Promise<Response> {
   const validationProbe = isConsumerValidationOrderId(orderId);
   if (!validationProbe) {
     const denied = checkConsumerAuth(request);

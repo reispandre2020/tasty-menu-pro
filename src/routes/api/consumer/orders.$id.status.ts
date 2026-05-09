@@ -16,7 +16,7 @@ const PatchSchema = z.object({
   consumer_external_id: z.string().max(120).optional(),
 });
 
-async function handleStatusChange(request: Request, orderId: string): Promise<Response> {
+export async function handleStatusChange(request: Request, orderId: string): Promise<Response> {
   if (isConsumerValidationOrderId(orderId)) {
     return new Response(
       JSON.stringify({
@@ -83,7 +83,7 @@ async function handleStatusChange(request: Request, orderId: string): Promise<Re
   );
 }
 
-async function handleStatusProbe(request: Request, orderId: string): Promise<Response> {
+export async function handleStatusProbe(request: Request, orderId: string): Promise<Response> {
   const validationProbe = isConsumerValidationOrderId(orderId);
   if (!validationProbe) {
     const denied = checkConsumerAuth(request);

@@ -30,6 +30,7 @@ import { Route as ApiConsumerOrdersDetailsRouteImport } from './routes/api/consu
 import { Route as ApiConsumerOrdersIdRouteImport } from './routes/api/consumer/orders.$id'
 import { Route as ApiConsumerOrdersIdStatusRouteImport } from './routes/api/consumer/orders.$id.status'
 import { Route as ApiConsumerOrdersIdDetailsRouteImport } from './routes/api/consumer/orders.$id.details'
+import { Route as ApiConsumerOrdersIdActionRouteImport } from './routes/api/consumer/orders.$id.$action'
 
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
@@ -142,6 +143,12 @@ const ApiConsumerOrdersIdDetailsRoute =
     path: '/details',
     getParentRoute: () => ApiConsumerOrdersIdRoute,
   } as any)
+const ApiConsumerOrdersIdActionRoute =
+  ApiConsumerOrdersIdActionRouteImport.update({
+    id: '/$action',
+    path: '/$action',
+    getParentRoute: () => ApiConsumerOrdersIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -162,6 +169,7 @@ export interface FileRoutesByFullPath {
   '/api/consumer/orders/$id': typeof ApiConsumerOrdersIdRouteWithChildren
   '/api/consumer/orders/details': typeof ApiConsumerOrdersDetailsRoute
   '/api/public/orders/$id': typeof ApiPublicOrdersIdRoute
+  '/api/consumer/orders/$id/$action': typeof ApiConsumerOrdersIdActionRoute
   '/api/consumer/orders/$id/details': typeof ApiConsumerOrdersIdDetailsRoute
   '/api/consumer/orders/$id/status': typeof ApiConsumerOrdersIdStatusRoute
 }
@@ -184,6 +192,7 @@ export interface FileRoutesByTo {
   '/api/consumer/orders/$id': typeof ApiConsumerOrdersIdRouteWithChildren
   '/api/consumer/orders/details': typeof ApiConsumerOrdersDetailsRoute
   '/api/public/orders/$id': typeof ApiPublicOrdersIdRoute
+  '/api/consumer/orders/$id/$action': typeof ApiConsumerOrdersIdActionRoute
   '/api/consumer/orders/$id/details': typeof ApiConsumerOrdersIdDetailsRoute
   '/api/consumer/orders/$id/status': typeof ApiConsumerOrdersIdStatusRoute
 }
@@ -208,6 +217,7 @@ export interface FileRoutesById {
   '/api/consumer/orders/$id': typeof ApiConsumerOrdersIdRouteWithChildren
   '/api/consumer/orders/details': typeof ApiConsumerOrdersDetailsRoute
   '/api/public/orders/$id': typeof ApiPublicOrdersIdRoute
+  '/api/consumer/orders/$id/$action': typeof ApiConsumerOrdersIdActionRoute
   '/api/consumer/orders/$id/details': typeof ApiConsumerOrdersIdDetailsRoute
   '/api/consumer/orders/$id/status': typeof ApiConsumerOrdersIdStatusRoute
 }
@@ -232,6 +242,7 @@ export interface FileRouteTypes {
     | '/api/consumer/orders/$id'
     | '/api/consumer/orders/details'
     | '/api/public/orders/$id'
+    | '/api/consumer/orders/$id/$action'
     | '/api/consumer/orders/$id/details'
     | '/api/consumer/orders/$id/status'
   fileRoutesByTo: FileRoutesByTo
@@ -254,6 +265,7 @@ export interface FileRouteTypes {
     | '/api/consumer/orders/$id'
     | '/api/consumer/orders/details'
     | '/api/public/orders/$id'
+    | '/api/consumer/orders/$id/$action'
     | '/api/consumer/orders/$id/details'
     | '/api/consumer/orders/$id/status'
   id:
@@ -277,6 +289,7 @@ export interface FileRouteTypes {
     | '/api/consumer/orders/$id'
     | '/api/consumer/orders/details'
     | '/api/public/orders/$id'
+    | '/api/consumer/orders/$id/$action'
     | '/api/consumer/orders/$id/details'
     | '/api/consumer/orders/$id/status'
   fileRoutesById: FileRoutesById
@@ -444,6 +457,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiConsumerOrdersIdDetailsRouteImport
       parentRoute: typeof ApiConsumerOrdersIdRoute
     }
+    '/api/consumer/orders/$id/$action': {
+      id: '/api/consumer/orders/$id/$action'
+      path: '/$action'
+      fullPath: '/api/consumer/orders/$id/$action'
+      preLoaderRoute: typeof ApiConsumerOrdersIdActionRouteImport
+      parentRoute: typeof ApiConsumerOrdersIdRoute
+    }
   }
 }
 
@@ -468,11 +488,13 @@ const AdminLayoutRouteWithChildren = AdminLayoutRoute._addFileChildren(
 )
 
 interface ApiConsumerOrdersIdRouteChildren {
+  ApiConsumerOrdersIdActionRoute: typeof ApiConsumerOrdersIdActionRoute
   ApiConsumerOrdersIdDetailsRoute: typeof ApiConsumerOrdersIdDetailsRoute
   ApiConsumerOrdersIdStatusRoute: typeof ApiConsumerOrdersIdStatusRoute
 }
 
 const ApiConsumerOrdersIdRouteChildren: ApiConsumerOrdersIdRouteChildren = {
+  ApiConsumerOrdersIdActionRoute: ApiConsumerOrdersIdActionRoute,
   ApiConsumerOrdersIdDetailsRoute: ApiConsumerOrdersIdDetailsRoute,
   ApiConsumerOrdersIdStatusRoute: ApiConsumerOrdersIdStatusRoute,
 }
