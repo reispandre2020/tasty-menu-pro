@@ -148,6 +148,7 @@ function MenuPage() {
               {settings?.phone && (
                 <span className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" />{settings.phone}</span>
               )}
+              <Link to="/sobre" className="font-semibold text-primary hover:underline">Ver mais</Link>
             </div>
           </div>
         </div>
