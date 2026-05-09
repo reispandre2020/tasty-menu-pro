@@ -31,6 +31,7 @@ export interface Product {
   image_url: string | null;
   is_available: boolean;
   sort_order: number;
+  external_code: string | null;
   created_at: string;
 }
 
@@ -53,12 +54,23 @@ export interface Order {
   customer_name: string;
   customer_phone: string;
   customer_address: string | null;
+  customer_document: string | null;
   table_number: string | null;
   notes: string | null;
   subtotal: number;
   delivery_fee: number;
   total: number;
   payment_method: string | null;
+  change_for: number | null;
+  pickup_code: string | null;
+  address_zip: string | null;
+  address_state: string | null;
+  address_city: string | null;
+  address_neighborhood: string | null;
+  address_street: string | null;
+  address_number: string | null;
+  address_complement: string | null;
+  address_reference: string | null;
   consumer_external_id: string | null;
   created_at: string;
   updated_at: string;

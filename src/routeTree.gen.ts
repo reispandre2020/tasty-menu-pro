@@ -19,11 +19,11 @@ import { Route as PedidoIdRouteImport } from './routes/pedido.$id'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminLayoutAdminIndexRouteImport } from './routes/_adminLayout.admin.index'
 import { Route as ApiConsumerOrdersRouteImport } from './routes/api/consumer/orders'
-import { Route as ApiConsumerMenuRouteImport } from './routes/api/consumer/menu'
 import { Route as AdminLayoutAdminProdutosRouteImport } from './routes/_adminLayout.admin.produtos'
 import { Route as AdminLayoutAdminConfiguracoesRouteImport } from './routes/_adminLayout.admin.configuracoes'
 import { Route as AdminLayoutAdminCategoriasRouteImport } from './routes/_adminLayout.admin.categorias'
 import { Route as ApiPublicOrdersIdRouteImport } from './routes/api/public/orders.$id'
+import { Route as ApiConsumerOrdersDetailsRouteImport } from './routes/api/consumer/orders.details'
 import { Route as ApiConsumerOrdersIdRouteImport } from './routes/api/consumer/orders.$id'
 import { Route as ApiConsumerOrdersIdStatusRouteImport } from './routes/api/consumer/orders.$id.status'
 
@@ -76,11 +76,6 @@ const ApiConsumerOrdersRoute = ApiConsumerOrdersRouteImport.update({
   path: '/api/consumer/orders',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiConsumerMenuRoute = ApiConsumerMenuRouteImport.update({
-  id: '/api/consumer/menu',
-  path: '/api/consumer/menu',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminLayoutAdminProdutosRoute =
   AdminLayoutAdminProdutosRouteImport.update({
     id: '/admin/produtos',
@@ -104,6 +99,12 @@ const ApiPublicOrdersIdRoute = ApiPublicOrdersIdRouteImport.update({
   path: '/api/public/orders/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiConsumerOrdersDetailsRoute =
+  ApiConsumerOrdersDetailsRouteImport.update({
+    id: '/details',
+    path: '/details',
+    getParentRoute: () => ApiConsumerOrdersRoute,
+  } as any)
 const ApiConsumerOrdersIdRoute = ApiConsumerOrdersIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -127,10 +128,10 @@ export interface FileRoutesByFullPath {
   '/admin/categorias': typeof AdminLayoutAdminCategoriasRoute
   '/admin/configuracoes': typeof AdminLayoutAdminConfiguracoesRoute
   '/admin/produtos': typeof AdminLayoutAdminProdutosRoute
-  '/api/consumer/menu': typeof ApiConsumerMenuRoute
   '/api/consumer/orders': typeof ApiConsumerOrdersRouteWithChildren
   '/admin/': typeof AdminLayoutAdminIndexRoute
   '/api/consumer/orders/$id': typeof ApiConsumerOrdersIdRouteWithChildren
+  '/api/consumer/orders/details': typeof ApiConsumerOrdersDetailsRoute
   '/api/public/orders/$id': typeof ApiPublicOrdersIdRoute
   '/api/consumer/orders/$id/status': typeof ApiConsumerOrdersIdStatusRoute
 }
@@ -145,10 +146,10 @@ export interface FileRoutesByTo {
   '/admin/categorias': typeof AdminLayoutAdminCategoriasRoute
   '/admin/configuracoes': typeof AdminLayoutAdminConfiguracoesRoute
   '/admin/produtos': typeof AdminLayoutAdminProdutosRoute
-  '/api/consumer/menu': typeof ApiConsumerMenuRoute
   '/api/consumer/orders': typeof ApiConsumerOrdersRouteWithChildren
   '/admin': typeof AdminLayoutAdminIndexRoute
   '/api/consumer/orders/$id': typeof ApiConsumerOrdersIdRouteWithChildren
+  '/api/consumer/orders/details': typeof ApiConsumerOrdersDetailsRoute
   '/api/public/orders/$id': typeof ApiPublicOrdersIdRoute
   '/api/consumer/orders/$id/status': typeof ApiConsumerOrdersIdStatusRoute
 }
@@ -165,10 +166,10 @@ export interface FileRoutesById {
   '/_adminLayout/admin/categorias': typeof AdminLayoutAdminCategoriasRoute
   '/_adminLayout/admin/configuracoes': typeof AdminLayoutAdminConfiguracoesRoute
   '/_adminLayout/admin/produtos': typeof AdminLayoutAdminProdutosRoute
-  '/api/consumer/menu': typeof ApiConsumerMenuRoute
   '/api/consumer/orders': typeof ApiConsumerOrdersRouteWithChildren
   '/_adminLayout/admin/': typeof AdminLayoutAdminIndexRoute
   '/api/consumer/orders/$id': typeof ApiConsumerOrdersIdRouteWithChildren
+  '/api/consumer/orders/details': typeof ApiConsumerOrdersDetailsRoute
   '/api/public/orders/$id': typeof ApiPublicOrdersIdRoute
   '/api/consumer/orders/$id/status': typeof ApiConsumerOrdersIdStatusRoute
 }
@@ -185,10 +186,10 @@ export interface FileRouteTypes {
     | '/admin/categorias'
     | '/admin/configuracoes'
     | '/admin/produtos'
-    | '/api/consumer/menu'
     | '/api/consumer/orders'
     | '/admin/'
     | '/api/consumer/orders/$id'
+    | '/api/consumer/orders/details'
     | '/api/public/orders/$id'
     | '/api/consumer/orders/$id/status'
   fileRoutesByTo: FileRoutesByTo
@@ -203,10 +204,10 @@ export interface FileRouteTypes {
     | '/admin/categorias'
     | '/admin/configuracoes'
     | '/admin/produtos'
-    | '/api/consumer/menu'
     | '/api/consumer/orders'
     | '/admin'
     | '/api/consumer/orders/$id'
+    | '/api/consumer/orders/details'
     | '/api/public/orders/$id'
     | '/api/consumer/orders/$id/status'
   id:
@@ -222,10 +223,10 @@ export interface FileRouteTypes {
     | '/_adminLayout/admin/categorias'
     | '/_adminLayout/admin/configuracoes'
     | '/_adminLayout/admin/produtos'
-    | '/api/consumer/menu'
     | '/api/consumer/orders'
     | '/_adminLayout/admin/'
     | '/api/consumer/orders/$id'
+    | '/api/consumer/orders/details'
     | '/api/public/orders/$id'
     | '/api/consumer/orders/$id/status'
   fileRoutesById: FileRoutesById
@@ -239,7 +240,6 @@ export interface RootRouteChildren {
   SobreRoute: typeof SobreRoute
   AdminLoginRoute: typeof AdminLoginRoute
   PedidoIdRoute: typeof PedidoIdRoute
-  ApiConsumerMenuRoute: typeof ApiConsumerMenuRoute
   ApiConsumerOrdersRoute: typeof ApiConsumerOrdersRouteWithChildren
   ApiPublicOrdersIdRoute: typeof ApiPublicOrdersIdRoute
 }
@@ -316,13 +316,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiConsumerOrdersRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/consumer/menu': {
-      id: '/api/consumer/menu'
-      path: '/api/consumer/menu'
-      fullPath: '/api/consumer/menu'
-      preLoaderRoute: typeof ApiConsumerMenuRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_adminLayout/admin/produtos': {
       id: '/_adminLayout/admin/produtos'
       path: '/admin/produtos'
@@ -350,6 +343,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/public/orders/$id'
       preLoaderRoute: typeof ApiPublicOrdersIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/api/consumer/orders/details': {
+      id: '/api/consumer/orders/details'
+      path: '/details'
+      fullPath: '/api/consumer/orders/details'
+      preLoaderRoute: typeof ApiConsumerOrdersDetailsRouteImport
+      parentRoute: typeof ApiConsumerOrdersRoute
     }
     '/api/consumer/orders/$id': {
       id: '/api/consumer/orders/$id'
@@ -399,10 +399,12 @@ const ApiConsumerOrdersIdRouteWithChildren =
 
 interface ApiConsumerOrdersRouteChildren {
   ApiConsumerOrdersIdRoute: typeof ApiConsumerOrdersIdRouteWithChildren
+  ApiConsumerOrdersDetailsRoute: typeof ApiConsumerOrdersDetailsRoute
 }
 
 const ApiConsumerOrdersRouteChildren: ApiConsumerOrdersRouteChildren = {
   ApiConsumerOrdersIdRoute: ApiConsumerOrdersIdRouteWithChildren,
+  ApiConsumerOrdersDetailsRoute: ApiConsumerOrdersDetailsRoute,
 }
 
 const ApiConsumerOrdersRouteWithChildren =
@@ -417,7 +419,6 @@ const rootRouteChildren: RootRouteChildren = {
   SobreRoute: SobreRoute,
   AdminLoginRoute: AdminLoginRoute,
   PedidoIdRoute: PedidoIdRoute,
-  ApiConsumerMenuRoute: ApiConsumerMenuRoute,
   ApiConsumerOrdersRoute: ApiConsumerOrdersRouteWithChildren,
   ApiPublicOrdersIdRoute: ApiPublicOrdersIdRoute,
 }
