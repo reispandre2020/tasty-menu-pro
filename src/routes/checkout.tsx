@@ -339,7 +339,9 @@ function CheckoutPage() {
       .single();
 
     if (error || !order) {
-      toast.error("Erro ao criar pedido. Tente novamente.");
+      console.error("[checkout] insert order failed:", error);
+      const msg = error?.message ?? "Erro desconhecido";
+      toast.error(`Erro ao criar pedido: ${msg}`);
       setSubmitting(false);
       return;
     }
