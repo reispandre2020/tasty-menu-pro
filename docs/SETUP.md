@@ -40,16 +40,19 @@ Endpoints expostos por este projeto (todos sob `/api/consumer/*`):
 |--------|---------|--------|
 | GET | `/api/consumer/orders` | **Polling de eventos** (PLC/CFM/CAN/DSP/CON). Marca eventos como lidos automaticamente — passe `?ack=false` para dry-run. |
 | GET | `/api/consumer/orders/:id` | Detalhes do pedido no formato oficial (consulta) |
-| POST | `/api/consumer/orders/details` | Push de detalhes (chamado pelo Consumer após `ORDER_DETAILS_REQUESTED`). Body: `{ OrderId, EventCode, EventFull }` |
+| POST | `/api/consumer/orders/details` | Envio de detalhes conforme PDF: aceita o pedido completo (`Id`, `Items`, `Total`, `Payments`...) e responde `{ statusCode: 0 }`. Também aceita a variação `{ OrderId, EventCode, EventFull }`. |
 | PATCH | `/api/consumer/orders/:id/status` | Atualizar status. Body: `{ orderId, status, justification? }`. Enums: `CONFIRMED`, `CANCELLED`, `READY_FOR_PICKUP`, `DISPATCHED`, `CONCLUDED` |
 
 **Autenticação:** Bearer token estático no header `Authorization: Bearer <CONSUMER_API_TOKEN>`.
 
 ### Configuração no painel Consumer (https://ajuda.programaconsumer.com.br/integracao-api-do-parceiro/)
 
-1. **URL base:** `https://SEU-DOMINIO.lovable.app`
-2. **Token:** valor configurado no secret `CONSUMER_API_TOKEN`
-3. **Merchant ID:** o ID do seu estabelecimento no Consumer — salve em `store_settings.consumer_merchant_id` via tela de Configurações.
+1. **Token:** valor configurado no secret `CONSUMER_API_TOKEN`
+2. **Consulta de eventos / polling:** `https://SEU-DOMINIO.lovable.app/api/consumer/orders`
+3. **Consulta de detalhes:** `https://SEU-DOMINIO.lovable.app/api/consumer/orders/{orderId}`
+4. **Envio de detalhes:** `https://SEU-DOMINIO.lovable.app/api/consumer/orders/details`
+5. **Alteração de status:** `https://SEU-DOMINIO.lovable.app/api/consumer/orders/{orderId}/status`
+6. **Merchant ID:** o ID do seu estabelecimento no Consumer — salve em `store_settings.consumer_merchant_id` via tela de Configurações.
 
 > Para habilitar a integração, adicione o secret `CONSUMER_API_TOKEN` (qualquer string longa e aleatória) no gerenciador de secrets do projeto e cole o mesmo valor no painel do Consumer.
 
