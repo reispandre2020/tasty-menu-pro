@@ -313,3 +313,10 @@ drop trigger if exists trg_orders_consumer_event_upd on public.orders;
 create trigger trg_orders_consumer_event_upd
   after update of status on public.orders
   for each row execute function public.enqueue_consumer_event();
+
+-- ============================================================
+-- Importação de produtos via XLSX: coluna flexível para campos
+-- desconhecidos (criada automaticamente pelo importador).
+-- ============================================================
+alter table public.products
+  add column if not exists extra_fields jsonb not null default '{}'::jsonb;
