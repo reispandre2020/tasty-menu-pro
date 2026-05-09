@@ -44,6 +44,7 @@ function ProductsAdmin() {
       image_url: "",
       is_available: true,
       sort_order: 0,
+      external_code: "",
       created_at: "",
     });
     setOpen(true);
@@ -58,6 +59,7 @@ function ProductsAdmin() {
       image_url: p.image_url?.trim() || null,
       is_available: p.is_available,
       sort_order: Number(p.sort_order) || 0,
+      external_code: p.external_code?.trim() || null,
     };
     if (!payload.name || !payload.category_id) { toast.error("Nome e categoria obrigatórios"); return; }
     const { error } = p.id
@@ -143,6 +145,17 @@ function ProductsAdmin() {
               <div>
                 <Label>Imagem (URL)</Label>
                 <Input value={editing.image_url ?? ""} onChange={(e) => setEditing({ ...editing, image_url: e.target.value })} placeholder="https://..." />
+              </div>
+              <div>
+                <Label>Código PDV (externalCode Consumer)</Label>
+                <Input
+                  value={editing.external_code ?? ""}
+                  onChange={(e) => setEditing({ ...editing, external_code: e.target.value })}
+                  placeholder="ex: 112"
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Usado pela integração do Programa Consumer para identificar o produto.
+                </p>
               </div>
               <div className="flex items-center justify-between rounded-lg border p-3">
                 <Label>Disponível no cardápio</Label>
