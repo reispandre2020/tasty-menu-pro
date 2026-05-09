@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { LayoutGrid, Package, FolderTree, Settings, LogOut, UtensilsCrossed, Loader2 } from "lucide-react";
+import { LayoutGrid, Package, FolderTree, Settings, LogOut, UtensilsCrossed, Loader2, Activity } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ const NAV = [
   { to: "/admin", label: "Pedidos", icon: LayoutGrid },
   { to: "/admin/produtos", label: "Produtos", icon: Package },
   { to: "/admin/categorias", label: "Categorias", icon: FolderTree },
+  { to: "/admin/diagnostico", label: "Diagnóstico", icon: Activity },
   { to: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ] as const;
 

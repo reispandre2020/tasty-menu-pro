@@ -22,6 +22,7 @@ import { Route as ApiPublicOrdersRouteImport } from './routes/api/public/orders'
 import { Route as ApiConsumerOrdersRouteImport } from './routes/api/consumer/orders'
 import { Route as ApiConsumerDiagnosticsRouteImport } from './routes/api/consumer/diagnostics'
 import { Route as AdminLayoutAdminProdutosRouteImport } from './routes/_adminLayout.admin.produtos'
+import { Route as AdminLayoutAdminDiagnosticoRouteImport } from './routes/_adminLayout.admin.diagnostico'
 import { Route as AdminLayoutAdminConfiguracoesRouteImport } from './routes/_adminLayout.admin.configuracoes'
 import { Route as AdminLayoutAdminCategoriasRouteImport } from './routes/_adminLayout.admin.categorias'
 import { Route as ApiPublicOrdersIdRouteImport } from './routes/api/public/orders.$id'
@@ -94,6 +95,12 @@ const AdminLayoutAdminProdutosRoute =
     path: '/admin/produtos',
     getParentRoute: () => AdminLayoutRoute,
   } as any)
+const AdminLayoutAdminDiagnosticoRoute =
+  AdminLayoutAdminDiagnosticoRouteImport.update({
+    id: '/admin/diagnostico',
+    path: '/admin/diagnostico',
+    getParentRoute: () => AdminLayoutRoute,
+  } as any)
 const AdminLayoutAdminConfiguracoesRoute =
   AdminLayoutAdminConfiguracoesRouteImport.update({
     id: '/admin/configuracoes',
@@ -139,6 +146,7 @@ export interface FileRoutesByFullPath {
   '/pedido/$id': typeof PedidoIdRoute
   '/admin/categorias': typeof AdminLayoutAdminCategoriasRoute
   '/admin/configuracoes': typeof AdminLayoutAdminConfiguracoesRoute
+  '/admin/diagnostico': typeof AdminLayoutAdminDiagnosticoRoute
   '/admin/produtos': typeof AdminLayoutAdminProdutosRoute
   '/api/consumer/diagnostics': typeof ApiConsumerDiagnosticsRoute
   '/api/consumer/orders': typeof ApiConsumerOrdersRouteWithChildren
@@ -159,6 +167,7 @@ export interface FileRoutesByTo {
   '/pedido/$id': typeof PedidoIdRoute
   '/admin/categorias': typeof AdminLayoutAdminCategoriasRoute
   '/admin/configuracoes': typeof AdminLayoutAdminConfiguracoesRoute
+  '/admin/diagnostico': typeof AdminLayoutAdminDiagnosticoRoute
   '/admin/produtos': typeof AdminLayoutAdminProdutosRoute
   '/api/consumer/diagnostics': typeof ApiConsumerDiagnosticsRoute
   '/api/consumer/orders': typeof ApiConsumerOrdersRouteWithChildren
@@ -181,6 +190,7 @@ export interface FileRoutesById {
   '/pedido/$id': typeof PedidoIdRoute
   '/_adminLayout/admin/categorias': typeof AdminLayoutAdminCategoriasRoute
   '/_adminLayout/admin/configuracoes': typeof AdminLayoutAdminConfiguracoesRoute
+  '/_adminLayout/admin/diagnostico': typeof AdminLayoutAdminDiagnosticoRoute
   '/_adminLayout/admin/produtos': typeof AdminLayoutAdminProdutosRoute
   '/api/consumer/diagnostics': typeof ApiConsumerDiagnosticsRoute
   '/api/consumer/orders': typeof ApiConsumerOrdersRouteWithChildren
@@ -203,6 +213,7 @@ export interface FileRouteTypes {
     | '/pedido/$id'
     | '/admin/categorias'
     | '/admin/configuracoes'
+    | '/admin/diagnostico'
     | '/admin/produtos'
     | '/api/consumer/diagnostics'
     | '/api/consumer/orders'
@@ -223,6 +234,7 @@ export interface FileRouteTypes {
     | '/pedido/$id'
     | '/admin/categorias'
     | '/admin/configuracoes'
+    | '/admin/diagnostico'
     | '/admin/produtos'
     | '/api/consumer/diagnostics'
     | '/api/consumer/orders'
@@ -244,6 +256,7 @@ export interface FileRouteTypes {
     | '/pedido/$id'
     | '/_adminLayout/admin/categorias'
     | '/_adminLayout/admin/configuracoes'
+    | '/_adminLayout/admin/diagnostico'
     | '/_adminLayout/admin/produtos'
     | '/api/consumer/diagnostics'
     | '/api/consumer/orders'
@@ -362,6 +375,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLayoutAdminProdutosRouteImport
       parentRoute: typeof AdminLayoutRoute
     }
+    '/_adminLayout/admin/diagnostico': {
+      id: '/_adminLayout/admin/diagnostico'
+      path: '/admin/diagnostico'
+      fullPath: '/admin/diagnostico'
+      preLoaderRoute: typeof AdminLayoutAdminDiagnosticoRouteImport
+      parentRoute: typeof AdminLayoutRoute
+    }
     '/_adminLayout/admin/configuracoes': {
       id: '/_adminLayout/admin/configuracoes'
       path: '/admin/configuracoes'
@@ -410,6 +430,7 @@ declare module '@tanstack/react-router' {
 interface AdminLayoutRouteChildren {
   AdminLayoutAdminCategoriasRoute: typeof AdminLayoutAdminCategoriasRoute
   AdminLayoutAdminConfiguracoesRoute: typeof AdminLayoutAdminConfiguracoesRoute
+  AdminLayoutAdminDiagnosticoRoute: typeof AdminLayoutAdminDiagnosticoRoute
   AdminLayoutAdminProdutosRoute: typeof AdminLayoutAdminProdutosRoute
   AdminLayoutAdminIndexRoute: typeof AdminLayoutAdminIndexRoute
 }
@@ -417,6 +438,7 @@ interface AdminLayoutRouteChildren {
 const AdminLayoutRouteChildren: AdminLayoutRouteChildren = {
   AdminLayoutAdminCategoriasRoute: AdminLayoutAdminCategoriasRoute,
   AdminLayoutAdminConfiguracoesRoute: AdminLayoutAdminConfiguracoesRoute,
+  AdminLayoutAdminDiagnosticoRoute: AdminLayoutAdminDiagnosticoRoute,
   AdminLayoutAdminProdutosRoute: AdminLayoutAdminProdutosRoute,
   AdminLayoutAdminIndexRoute: AdminLayoutAdminIndexRoute,
 }
