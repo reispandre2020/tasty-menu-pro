@@ -23,9 +23,13 @@ export function checkConsumerAuth(request: Request): Response | null {
   }
   for (const h of [
     "x-api-key",
+    "xapikey",
     "x-access-token",
+    "xaccesstoken",
     "x-auth-token",
+    "xauthtoken",
     "x-consumer-token",
+    "xconsumertoken",
     "api-key",
     "apikey",
     "token",
@@ -64,5 +68,5 @@ export function checkConsumerAuth(request: Request): Response | null {
 export const CORS_HEADERS = {
   "access-control-allow-origin": "*",
   "access-control-allow-methods": "GET,POST,PATCH,OPTIONS",
-  "access-control-allow-headers": "authorization,content-type,x-api-key,x-access-token,x-auth-token,x-consumer-token,api-key,apikey,token",
+  "access-control-allow-headers": "authorization,content-type,x-api-key,xapikey,x-access-token,xaccesstoken,x-auth-token,xauthtoken,x-consumer-token,xconsumertoken,api-key,apikey,token",
 };
