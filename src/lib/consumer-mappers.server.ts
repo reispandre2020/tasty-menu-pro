@@ -22,6 +22,25 @@ export const INTERNAL_STATUS_TO_CONSUMER: Record<OrderStatus, { code: string; fu
   cancelled: { code: "CAN", full: "CANCELLED" },
 };
 
+export function getConsumerExternalCode(product: { external_code?: string | null; extra_fields?: Record<string, unknown> | null }): string {
+  const native = String(product.external_code ?? "").trim();
+  if (native) return native;
+  const extras = product.extra_fields ?? {};
+  for (const [key, value] of Object.entries(extras)) {
+    const normalized = key
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "_");
+    if ((normalized.includes("codigo_pdv_produto") || normalized.includes("codigo_pdv_complemento") || normalized === "codigo_pdv") && value != null) {
+      const code = String(value).trim();
+      if (code) return code;
+    }
+  }
+  return "";
+}
+
 // ----- Métodos de pagamento -> Enum oficial -----
 export function mapPaymentMethod(m: string | null): { method: string; type: string; brand?: string } {
   switch ((m ?? "").toLowerCase()) {
