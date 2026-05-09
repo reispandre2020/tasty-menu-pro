@@ -254,7 +254,8 @@ create policy "admin le eventos consumer" on public.consumer_events
 
 -- D. Triggers: enfileira eventos automaticamente quando pedido muda
 create or replace function public.enqueue_consumer_event()
-returns trigger language plpgsql as $$
+returns trigger language plpgsql
+security definer set search_path = public as $$
 declare
   v_code text;
   v_full text;
