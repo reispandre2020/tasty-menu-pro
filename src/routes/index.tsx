@@ -110,6 +110,10 @@ function MenuPage() {
             }}
           />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,_rgba(255,255,255,0.06)_1px,_transparent_0)] [background-size:18px_18px]" />
+          {/* HAMBURGER MENU */}
+          <div className="absolute left-3 top-3 z-10">
+            <SideMenu storeName={storeName} initial={initial} />
+          </div>
         </div>
 
         {/* Logo + nome flutuando sobre o cover */}
