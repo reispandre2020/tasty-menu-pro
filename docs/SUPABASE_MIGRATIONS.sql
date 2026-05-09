@@ -283,10 +283,12 @@ begin
   return new;
 end $$;
 
+-- IMPORTANTE: o evento PLACED é inserido pela rota /api/public/orders no
+-- backend (com service role). Por isso NÃO criamos mais o trigger de INSERT
+-- aqui — ele causava duplicidade e/ou erro de RLS quando o anon tentava
+-- gravar via trigger. Mantemos só o trigger de UPDATE para refletir as
+-- mudanças de status feitas pelo admin no painel.
 drop trigger if exists trg_orders_consumer_event_ins on public.orders;
-create trigger trg_orders_consumer_event_ins
-  after insert on public.orders
-  for each row execute function public.enqueue_consumer_event();
 
 drop trigger if exists trg_orders_consumer_event_upd on public.orders;
 create trigger trg_orders_consumer_event_upd

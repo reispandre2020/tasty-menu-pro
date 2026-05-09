@@ -126,6 +126,26 @@ export const Route = createFileRoute("/api/public/orders")({
           return new Response(JSON.stringify({ error: itemsError.message }), { status: 500, headers: JsonHeaders });
         }
 
+        // Enfileira evento PLACED para o polling do Consumer.
+        // Faz isso explicitamente (em vez de depender só do trigger SQL),
+        // garantindo que o pedido apareça no Consumer mesmo se o trigger
+        // de INSERT não existir / estiver desativado no banco.
+        const { data: existingEvt } = await supabaseAdmin
+          .from("consumer_events")
+          .select("id")
+          .eq("order_id", order.id)
+          .eq("full_code", "PLACED")
+          .limit(1)
+          .maybeSingle();
+        if (!existingEvt) {
+          const { error: evtError } = await supabaseAdmin
+            .from("consumer_events")
+            .insert({ order_id: order.id, code: "PLC", full_code: "PLACED" });
+          if (evtError) {
+            console.error("[orders] falha ao enfileirar consumer_event:", evtError);
+          }
+        }
+
         return new Response(JSON.stringify({ order }), { status: 201, headers: JsonHeaders });
         } catch (error) {
           const message = error instanceof Error ? error.message : "Erro interno ao criar pedido.";
