@@ -13,6 +13,7 @@ const NAV = [
   { to: "/admin", label: "Pedidos", icon: LayoutGrid },
   { to: "/admin/produtos", label: "Produtos", icon: Package },
   { to: "/admin/categorias", label: "Categorias", icon: FolderTree },
+  { to: "/admin/diagnostico", label: "Diagnóstico", icon: Activity },
   { to: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ] as const;
 
