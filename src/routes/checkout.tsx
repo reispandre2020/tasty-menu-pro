@@ -298,18 +298,16 @@ function CheckoutPage() {
 
     const finalNotes = [
       notes.trim() || null,
-      cpf.trim() ? `CPF: ${cpf.trim()}` : null,
       coupon.trim() ? `Cupom: ${coupon.trim()}` : null,
-      paymentMethod === "cash" && needsChange && changeFor
-        ? `Troco para ${brl(Number(changeFor.replace(/\D/g, "")) / 100)}`
-        : paymentMethod === "cash" && !needsChange
-          ? "Não precisa de troco"
-          : null,
     ]
       .filter(Boolean)
       .join(" | ") || null;
 
     const customerAddr = mode === "delivery" ? formatAddress(address) : null;
+    const changeForValue =
+      paymentMethod === "cash" && needsChange && changeFor
+        ? Number(changeFor.replace(/\D/g, "")) / 100
+        : null;
 
     const { data: order, error } = await supabase
       .from("orders")
@@ -319,12 +317,23 @@ function CheckoutPage() {
         customer_name: name.trim(),
         customer_phone: phone.replace(/\D/g, ""),
         customer_address: customerAddr,
+        customer_document: cpf.trim() || null,
         table_number: null,
         notes: finalNotes,
         subtotal,
         delivery_fee: deliveryFee,
         total,
         payment_method: paymentMethod,
+        change_for: changeForValue,
+        // endereço estruturado (obrigatório para integração Consumer)
+        address_zip: mode === "delivery" ? address.cep.replace(/\D/g, "") || null : null,
+        address_state: mode === "delivery" ? address.uf || null : null,
+        address_city: mode === "delivery" ? address.cidade || null : null,
+        address_neighborhood: mode === "delivery" ? address.bairro || null : null,
+        address_street: mode === "delivery" ? address.endereco || null : null,
+        address_number: mode === "delivery" ? (address.semNumero ? "S/N" : address.numero) || null : null,
+        address_complement: mode === "delivery" && !address.semCompl ? address.complemento || null : null,
+        address_reference: mode === "delivery" ? address.referencia || null : null,
       })
       .select("id, short_code")
       .single();
