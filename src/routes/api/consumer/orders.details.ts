@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { checkConsumerAuth, CORS_HEADERS, isConsumerValidationOrderId } from "@/lib/consumer-auth.server";
-import { buildOrderPush } from "@/lib/consumer-mappers.server";
+import { buildOrderPush, getConsumerExternalCode } from "@/lib/consumer-mappers.server";
 import type { Order, OrderItem } from "@/lib/menu-types";
 
 // POST /api/consumer/orders/details
@@ -73,12 +73,12 @@ export const Route = createFileRoute("/api/consumer/orders/details")({
         const productMap = new Map<string, string | null>();
         if (productIds.length > 0) {
           const { data: prods } = await supabaseAdmin
-            .from("products").select("id, external_code").in("id", productIds);
-          (prods ?? []).forEach((p) => productMap.set(p.id, p.external_code));
+            .from("products").select("id, external_code, extra_fields").in("id", productIds);
+          (prods ?? []).forEach((p) => productMap.set(p.id, getConsumerExternalCode(p)));
         }
         const itemsWithCode = (items as OrderItem[]).map((it) => ({
           ...it,
-          external_code: it.product_id ? productMap.get(it.product_id) ?? null : null,
+          external_code: it.product_id ? productMap.get(it.product_id) ?? "" : "",
         }));
 
         const payload = buildOrderPush(
