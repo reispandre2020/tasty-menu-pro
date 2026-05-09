@@ -36,6 +36,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -495,6 +496,7 @@ function CheckoutPage() {
       <Dialog open={showMap} onOpenChange={setShowMap}>
         <DialogContent className="max-w-md p-0 overflow-hidden">
           <DialogTitle className="sr-only">Confirmar localização</DialogTitle>
+          <DialogDescription className="sr-only">Ajuste ou confirme o endereço de entrega no mapa.</DialogDescription>
           <MapConfirm
             address={pendingMapAddress}
             onAdjust={() => {
@@ -510,6 +512,7 @@ function CheckoutPage() {
       <Dialog open={showChangeDialog} onOpenChange={setShowChangeDialog}>
         <DialogContent className="max-w-md">
           <DialogTitle>Preciso de troco para:</DialogTitle>
+          <DialogDescription className="sr-only">Informe o valor para o qual você precisa de troco.</DialogDescription>
           <Input
             inputMode="numeric"
             placeholder="R$ 0,00"

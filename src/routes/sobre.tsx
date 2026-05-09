@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import type { StoreSettings } from "@/lib/menu-types";
@@ -11,10 +11,14 @@ export const Route = createFileRoute("/sobre")({
 });
 
 function SobrePage() {
-  const [s, setS] = useState<StoreSettings | null>(null);
-  useEffect(() => {
-    supabase.from("store_settings").select("*").limit(1).maybeSingle().then(({ data }) => setS(data as StoreSettings));
-  }, []);
+  const { data: s } = useQuery({
+    queryKey: ["store-settings"],
+    queryFn: async () => {
+      const { data } = await supabase.from("store_settings").select("*").limit(1).maybeSingle();
+      return (data as StoreSettings) ?? null;
+    },
+    staleTime: 5 * 60_000,
+  });
   const initial = (s?.store_name ?? "L").charAt(0).toUpperCase();
   return (
     <div className="min-h-screen bg-background">
