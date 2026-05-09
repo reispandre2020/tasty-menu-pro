@@ -36,6 +36,7 @@ export const Route = createFileRoute("/api/public/orders")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        try {
         let body: unknown;
         try { body = await request.json(); } catch {
           return new Response(JSON.stringify({ error: "invalid_json" }), { status: 400, headers: JsonHeaders });
@@ -126,6 +127,10 @@ export const Route = createFileRoute("/api/public/orders")({
         }
 
         return new Response(JSON.stringify({ order }), { status: 201, headers: JsonHeaders });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "Erro interno ao criar pedido.";
+          return new Response(JSON.stringify({ error: message }), { status: 500, headers: JsonHeaders });
+        }
       },
     },
   },
