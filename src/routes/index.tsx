@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ShoppingBag, Plus, Minus, Trash2, Clock, MapPin, Search, Phone, Menu as MenuIcon, MoreVertical, LogIn, UtensilsCrossed, Percent, Info, ArrowLeft } from "lucide-react";
+import { ShoppingBag, Plus, Minus, Trash2, Clock, MapPin, Search, Phone, Menu as MenuIcon, MoreVertical, LogIn, UtensilsCrossed, Percent, Info } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import type { Category, Product, StoreSettings } from "@/lib/menu-types";
