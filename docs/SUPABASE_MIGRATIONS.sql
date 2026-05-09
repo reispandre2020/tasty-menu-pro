@@ -210,3 +210,84 @@ on conflict do nothing;
 -- Após criar o usuário em Authentication -> Users (ou pelo /admin/login com signup),
 -- pegue o UUID do usuário e rode:
 --    insert into public.user_roles (user_id, role) values ('SEU-USER-UUID-AQUI','admin');
+
+-- ============================================================
+-- MIGRAÇÃO 2: Integração oficial Programa Consumer
+-- (anexada em: cardápio v2 — execute no SQL Editor depois da v1)
+-- ============================================================
+
+-- A. Códigos PDV (externalCode) em produtos e categorias
+alter table public.products    add column if not exists external_code text;
+alter table public.categories  add column if not exists external_code text;
+create index if not exists products_external_code_idx on public.products(external_code);
+
+-- B. Endereço estruturado, troco e documento do cliente em pedidos
+alter table public.orders add column if not exists address_zip          text;
+alter table public.orders add column if not exists address_state        text;
+alter table public.orders add column if not exists address_city         text;
+alter table public.orders add column if not exists address_neighborhood text;
+alter table public.orders add column if not exists address_street       text;
+alter table public.orders add column if not exists address_number       text;
+alter table public.orders add column if not exists address_complement   text;
+alter table public.orders add column if not exists address_reference    text;
+alter table public.orders add column if not exists customer_document    text;
+alter table public.orders add column if not exists change_for           numeric(10,2);
+alter table public.orders add column if not exists pickup_code          text;
+
+-- C. Tabela de eventos para o polling do Consumer
+create table if not exists public.consumer_events (
+  id uuid primary key default gen_random_uuid(),
+  order_id uuid not null references public.orders(id) on delete cascade,
+  code text not null,        -- ex: PLC, CFM, CAN, DSP, CON, ODR
+  full_code text not null,   -- ex: PLACED, CONFIRMED, CANCELLED, DISPATCHED, CONCLUDED
+  acknowledged_at timestamptz,
+  created_at timestamptz not null default now()
+);
+create index if not exists consumer_events_unack_idx
+  on public.consumer_events(created_at)
+  where acknowledged_at is null;
+
+alter table public.consumer_events enable row level security;
+drop policy if exists "admin le eventos consumer" on public.consumer_events;
+create policy "admin le eventos consumer" on public.consumer_events
+  for select using (public.has_role(auth.uid(),'admin'));
+
+-- D. Triggers: enfileira eventos automaticamente quando pedido muda
+create or replace function public.enqueue_consumer_event()
+returns trigger language plpgsql as $$
+declare
+  v_code text;
+  v_full text;
+begin
+  if (tg_op = 'INSERT') then
+    insert into public.consumer_events(order_id, code, full_code)
+    values (new.id, 'PLC', 'PLACED');
+    return new;
+  elsif (tg_op = 'UPDATE') and new.status is distinct from old.status then
+    case new.status
+      when 'confirmed'        then v_code := 'CFM'; v_full := 'CONFIRMED';
+      when 'preparing'        then v_code := 'CFM'; v_full := 'CONFIRMED';
+      when 'ready'            then v_code := 'RPU'; v_full := 'READY_FOR_PICKUP';
+      when 'out_for_delivery' then v_code := 'DSP'; v_full := 'DISPATCHED';
+      when 'delivered'        then v_code := 'CON'; v_full := 'CONCLUDED';
+      when 'cancelled'        then v_code := 'CAN'; v_full := 'CANCELLED';
+      else v_code := null;
+    end case;
+    if v_code is not null then
+      insert into public.consumer_events(order_id, code, full_code)
+      values (new.id, v_code, v_full);
+    end if;
+    return new;
+  end if;
+  return new;
+end $$;
+
+drop trigger if exists trg_orders_consumer_event_ins on public.orders;
+create trigger trg_orders_consumer_event_ins
+  after insert on public.orders
+  for each row execute function public.enqueue_consumer_event();
+
+drop trigger if exists trg_orders_consumer_event_upd on public.orders;
+create trigger trg_orders_consumer_event_upd
+  after update of status on public.orders
+  for each row execute function public.enqueue_consumer_event();
