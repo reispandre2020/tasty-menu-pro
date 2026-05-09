@@ -65,6 +65,11 @@ export function checkConsumerAuth(request: Request): Response | null {
   return null;
 }
 
+export function isConsumerValidationOrderId(orderId: string): boolean {
+  const decoded = decodeURIComponent(orderId).trim().toLowerCase();
+  return decoded === "{orderid}" || decoded === "{order_id}" || decoded === "orderid" || decoded === ":orderid";
+}
+
 export const CORS_HEADERS = {
   "access-control-allow-origin": "*",
   "access-control-allow-methods": "GET,POST,PATCH,OPTIONS",

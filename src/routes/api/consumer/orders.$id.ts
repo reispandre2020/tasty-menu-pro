@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { checkConsumerAuth, CORS_HEADERS } from "@/lib/consumer-auth.server";
+import { checkConsumerAuth, CORS_HEADERS, isConsumerValidationOrderId } from "@/lib/consumer-auth.server";
 import { buildOrderDetails } from "@/lib/consumer-mappers.server";
 import type { Order, OrderItem } from "@/lib/menu-types";
 
@@ -10,8 +10,21 @@ export const Route = createFileRoute("/api/consumer/orders/$id")({
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: CORS_HEADERS }),
       GET: async ({ request, params }) => {
-        const denied = checkConsumerAuth(request);
-        if (denied) return denied;
+        const validationProbe = isConsumerValidationOrderId(params.id);
+        if (!validationProbe) {
+          const denied = checkConsumerAuth(request);
+          if (denied) return denied;
+        }
+
+        if (validationProbe) {
+          return new Response(JSON.stringify({
+            item: null,
+            statusCode: 0,
+            reasonPhrase: "Endpoint de detalhes validado. Use um orderId real nas chamadas operacionais.",
+          }), {
+            status: 200, headers: { "content-type": "application/json", ...CORS_HEADERS },
+          });
+        }
 
         const [{ data: order, error }, { data: items }, { data: settings }] = await Promise.all([
           supabaseAdmin.from("orders").select("*").eq("id", params.id).maybeSingle(),

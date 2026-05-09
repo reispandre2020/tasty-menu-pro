@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { checkConsumerAuth, CORS_HEADERS } from "@/lib/consumer-auth.server";
+import { checkConsumerAuth, CORS_HEADERS, isConsumerValidationOrderId } from "@/lib/consumer-auth.server";
 import { CONSUMER_STATUS_TO_INTERNAL } from "@/lib/consumer-mappers.server";
 
 // PATCH/POST /api/consumer/orders/:id/status — Consumer atualiza status do pedido
@@ -74,11 +74,21 @@ async function handleStatusChange(request: Request, orderId: string): Promise<Re
 }
 
 async function handleStatusProbe(request: Request, orderId: string): Promise<Response> {
-  const denied = checkConsumerAuth(request);
-  if (denied) return denied;
+  const validationProbe = isConsumerValidationOrderId(orderId);
+  if (!validationProbe) {
+    const denied = checkConsumerAuth(request);
+    if (denied) return denied;
+  }
 
-  if (/^\{orderid\}$/i.test(orderId)) {
+  if (validationProbe) {
     console.warn("[consumer-status] GET recebido com placeholder literal; verifique se a URL no Consumer usa {orderid}.");
+    return new Response(
+      JSON.stringify({
+        statusCode: 0,
+        reasonPhrase: "Endpoint de status validado. Use um orderId real ao enviar alterações.",
+      }),
+      { status: 200, headers: { "content-type": "application/json", ...CORS_HEADERS } },
+    );
   }
 
   const { data, error } = await supabaseAdmin
