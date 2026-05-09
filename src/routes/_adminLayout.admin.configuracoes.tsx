@@ -72,10 +72,10 @@ function SettingsPage() {
           <div className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
             <p className="font-medium text-foreground">Endpoints expostos para o Consumer:</p>
             <ul className="mt-1 space-y-0.5 font-mono">
-              <li>GET /api/consumer/menu</li>
-              <li>GET /api/consumer/orders?status=pending</li>
-              <li>GET /api/consumer/orders/:id</li>
-              <li>PATCH /api/consumer/orders/:id/status</li>
+              <li>GET /api/consumer/orders (polling de eventos)</li>
+              <li>GET /api/consumer/orders/:id (detalhes)</li>
+              <li>POST /api/consumer/orders/details (push de detalhes)</li>
+              <li>PATCH /api/consumer/orders/:id/status (CONFIRMED/CANCELLED/...)</li>
             </ul>
           </div>
         </section>
