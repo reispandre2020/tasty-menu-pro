@@ -25,29 +25,34 @@ export const Route = createFileRoute("/")({
 });
 
 function MenuPage() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [settings, setSettings] = useState<StoreSettings | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data, isLoading } = useQuery({
+    queryKey: ["menu-data"],
+    queryFn: async () => {
+      const [cats, prods, st] = await Promise.all([
+        supabase.from("categories").select("*").eq("is_active", true).order("sort_order"),
+        supabase.from("products").select("*").eq("is_available", true).order("sort_order"),
+        supabase.from("store_settings").select("*").limit(1).maybeSingle(),
+      ]);
+      return {
+        categories: (cats.data as Category[]) ?? [],
+        products: (prods.data as Product[]) ?? [],
+        settings: (st.data as StoreSettings) ?? null,
+      };
+    },
+    staleTime: 5 * 60_000,
+  });
+  const categories = data?.categories ?? [];
+  const products = data?.products ?? [];
+  const settings = data?.settings ?? null;
+  const loading = isLoading;
   const [activeCat, setActiveCat] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const cart = useCart();
   const tabsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    (async () => {
-      const [cats, prods, st] = await Promise.all([
-        supabase.from("categories").select("*").eq("is_active", true).order("sort_order"),
-        supabase.from("products").select("*").eq("is_available", true).order("sort_order"),
-        supabase.from("store_settings").select("*").limit(1).maybeSingle(),
-      ]);
-      setCategories((cats.data as Category[]) ?? []);
-      setProducts((prods.data as Product[]) ?? []);
-      setSettings((st.data as StoreSettings) ?? null);
-      setActiveCat(((cats.data as Category[]) ?? [])[0]?.id ?? null);
-      setLoading(false);
-    })();
-  }, []);
+    if (!activeCat && categories[0]) setActiveCat(categories[0].id);
+  }, [categories, activeCat]);
 
   // Observer para destacar a categoria visível na tab bar
   useEffect(() => {
