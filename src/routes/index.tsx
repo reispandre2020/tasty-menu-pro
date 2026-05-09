@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ShoppingBag, Plus, Minus, Trash2, Clock, MapPin, Search, Phone } from "lucide-react";
+import { ShoppingBag, Plus, Minus, Trash2, Clock, MapPin, Search, Phone, Menu as MenuIcon, MoreVertical, LogIn, UtensilsCrossed, Percent, Info } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import type { Category, Product, StoreSettings } from "@/lib/menu-types";
 import { brl } from "@/lib/format";
@@ -109,6 +110,10 @@ function MenuPage() {
             }}
           />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,_rgba(255,255,255,0.06)_1px,_transparent_0)] [background-size:18px_18px]" />
+          {/* HAMBURGER MENU */}
+          <div className="absolute left-3 top-3 z-10">
+            <SideMenu storeName={storeName} initial={initial} />
+          </div>
         </div>
 
         {/* Logo + nome flutuando sobre o cover */}
@@ -157,35 +162,44 @@ function MenuPage() {
 
       {/* CATEGORIES TABS — sticky, underline style */}
       <nav className="sticky top-0 z-30 mt-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-        <div
-          ref={tabsRef}
-          className="mx-auto flex max-w-3xl gap-1 overflow-x-auto px-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {categories.map((c) => {
-            const isActive = activeCat === c.id;
-            return (
-              <button
-                key={c.id}
-                data-cat-id={c.id}
-                onClick={() => {
-                  setActiveCat(c.id);
-                  document.getElementById(`cat-${c.id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
-                }}
-                className={cn(
-                  "relative whitespace-nowrap px-3 py-3 text-sm font-medium transition-colors",
-                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {c.name}
-                <span
+        <div className="mx-auto flex max-w-3xl items-center px-2">
+          <CategoriesDialog
+            categories={categories}
+            onSelect={(id) => {
+              setActiveCat(id);
+              document.getElementById(`cat-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+          />
+          <div
+            ref={tabsRef}
+            className="flex flex-1 gap-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {categories.map((c) => {
+              const isActive = activeCat === c.id;
+              return (
+                <button
+                  key={c.id}
+                  data-cat-id={c.id}
+                  onClick={() => {
+                    setActiveCat(c.id);
+                    document.getElementById(`cat-${c.id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }}
                   className={cn(
-                    "absolute inset-x-2 bottom-0 h-0.5 rounded-full transition-all",
-                    isActive ? "bg-primary scale-x-100" : "bg-transparent scale-x-0",
+                    "relative whitespace-nowrap px-3 py-3 text-sm font-medium transition-colors",
+                    isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
                   )}
-                />
-              </button>
-            );
-          })}
+                >
+                  {c.name}
+                  <span
+                    className={cn(
+                      "absolute inset-x-2 bottom-0 h-0.5 rounded-full transition-all",
+                      isActive ? "bg-primary scale-x-100" : "bg-transparent scale-x-0",
+                    )}
+                  />
+                </button>
+              );
+            })}
+          </div>
         </div>
       </nav>
 
@@ -344,5 +358,71 @@ function CartTrigger({ itemCount, total, fullWidth }: { itemCount: number; total
         )}
       </SheetContent>
     </Sheet>
+  );
+}
+
+function SideMenu({ storeName, initial }: { storeName: string; initial: string }) {
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button size="icon" variant="ghost" className="h-10 w-10 rounded-full bg-background/20 text-white hover:bg-background/30 backdrop-blur" aria-label="Abrir menu">
+          <MenuIcon className="h-5 w-5" />
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-72 p-0">
+        <div className="flex items-center gap-3 border-b border-border p-4">
+          <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-primary to-primary-glow text-primary-foreground font-display">
+            {initial}
+          </div>
+          <SheetTitle className="text-base font-semibold truncate">{storeName}</SheetTitle>
+        </div>
+        <nav className="flex flex-col py-2">
+          <Link to="/entrar" className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted">
+            <LogIn className="h-5 w-5 text-primary" /> Entrar
+          </Link>
+          <Link to="/" className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted">
+            <UtensilsCrossed className="h-5 w-5 text-primary" /> Cardápio
+          </Link>
+          <Link to="/cupons" className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted">
+            <Percent className="h-5 w-5 text-primary" /> Cupons de Desconto
+          </Link>
+          <Link to="/sobre" className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted">
+            <Info className="h-5 w-5 text-primary" /> Sobre Nós
+          </Link>
+        </nav>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function CategoriesDialog({ categories, onSelect }: { categories: Category[]; onSelect: (id: string) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="icon" variant="ghost" className="h-10 w-10 shrink-0" aria-label="Ver todas categorias">
+          <MoreVertical className="h-5 w-5" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-sm p-0">
+        <DialogHeader className="border-b border-border p-4">
+          <DialogTitle className="text-center tracking-[0.3em] text-sm">— MENU —</DialogTitle>
+        </DialogHeader>
+        <div className="max-h-[60vh] overflow-y-auto py-2">
+          {categories.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => {
+                onSelect(c.id);
+                setOpen(false);
+              }}
+              className="block w-full px-4 py-3 text-center text-sm font-medium uppercase tracking-wide hover:bg-muted"
+            >
+              {c.name}
+            </button>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
