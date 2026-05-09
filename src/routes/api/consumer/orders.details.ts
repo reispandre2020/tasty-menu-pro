@@ -6,14 +6,25 @@ import { buildOrderPush, getConsumerExternalCode } from "@/lib/consumer-mappers.
 import type { Order, OrderItem } from "@/lib/menu-types";
 
 // POST /api/consumer/orders/details
-// Endpoint chamado pelo Consumer após receber o evento ORDER_DETAILS_REQUESTED.
-// Recebe { OrderId, EventCode, EventFull } e responde com TODOS os detalhes
-// do pedido no formato camelCase oficial.
+// A documentação do Consumer usa este endpoint para dois cenários:
+// 1) callback de "envio dos detalhes" com o pedido completo (Id, Items, Total...)
+//    e resposta apenas { statusCode, reasonPhrase };
+// 2) variação legada com { OrderId, EventCode, EventFull }, onde retornamos os detalhes.
 const PostSchema = z.object({
   OrderId: z.string().min(1).max(120),
   EventCode: z.string().max(20).optional(),
   EventFull: z.string().max(120).optional(),
+  EventFullCode: z.string().max(120).optional(),
 });
+
+const IncomingDetailsSchema = z.object({
+  Id: z.string().min(1).max(120),
+  Type: z.string().min(1).max(40).optional(),
+  DisplayId: z.string().min(1).max(120).optional(),
+  Items: z.array(z.unknown()).optional(),
+  Total: z.unknown().optional(),
+  Payments: z.unknown().optional(),
+}).passthrough();
 
 export const Route = createFileRoute("/api/consumer/orders/details")({
   server: {
@@ -27,13 +38,24 @@ export const Route = createFileRoute("/api/consumer/orders/details")({
           });
         }
 
+        const fields = body && typeof body === "object" ? body as Record<string, unknown> : {};
         const maybeOrderId = body && typeof body === "object"
-          ? (body as Record<string, unknown>).OrderId ?? (body as Record<string, unknown>).orderId ?? (body as Record<string, unknown>).id
+          ? fields.OrderId ?? fields.orderId ?? fields.id ?? fields.Id
           : undefined;
         const validationProbe = typeof maybeOrderId === "string" && isConsumerValidationOrderId(maybeOrderId);
         if (!validationProbe) {
           const denied = checkConsumerAuth(request);
           if (denied) return denied;
+        }
+
+        const incomingDetails = IncomingDetailsSchema.safeParse(body);
+        if (incomingDetails.success) {
+          return new Response(JSON.stringify({
+            statusCode: 0,
+            reasonPhrase: `${incomingDetails.data.Id} enviado com sucesso.`,
+          }), {
+            status: 200, headers: { "content-type": "application/json", ...CORS_HEADERS },
+          });
         }
 
         const parsed = PostSchema.safeParse(body);
