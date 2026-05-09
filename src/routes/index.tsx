@@ -162,35 +162,44 @@ function MenuPage() {
 
       {/* CATEGORIES TABS — sticky, underline style */}
       <nav className="sticky top-0 z-30 mt-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-        <div
-          ref={tabsRef}
-          className="mx-auto flex max-w-3xl gap-1 overflow-x-auto px-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {categories.map((c) => {
-            const isActive = activeCat === c.id;
-            return (
-              <button
-                key={c.id}
-                data-cat-id={c.id}
-                onClick={() => {
-                  setActiveCat(c.id);
-                  document.getElementById(`cat-${c.id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
-                }}
-                className={cn(
-                  "relative whitespace-nowrap px-3 py-3 text-sm font-medium transition-colors",
-                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {c.name}
-                <span
+        <div className="mx-auto flex max-w-3xl items-center px-2">
+          <CategoriesDialog
+            categories={categories}
+            onSelect={(id) => {
+              setActiveCat(id);
+              document.getElementById(`cat-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+          />
+          <div
+            ref={tabsRef}
+            className="flex flex-1 gap-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {categories.map((c) => {
+              const isActive = activeCat === c.id;
+              return (
+                <button
+                  key={c.id}
+                  data-cat-id={c.id}
+                  onClick={() => {
+                    setActiveCat(c.id);
+                    document.getElementById(`cat-${c.id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }}
                   className={cn(
-                    "absolute inset-x-2 bottom-0 h-0.5 rounded-full transition-all",
-                    isActive ? "bg-primary scale-x-100" : "bg-transparent scale-x-0",
+                    "relative whitespace-nowrap px-3 py-3 text-sm font-medium transition-colors",
+                    isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
                   )}
-                />
-              </button>
-            );
-          })}
+                >
+                  {c.name}
+                  <span
+                    className={cn(
+                      "absolute inset-x-2 bottom-0 h-0.5 rounded-full transition-all",
+                      isActive ? "bg-primary scale-x-100" : "bg-transparent scale-x-0",
+                    )}
+                  />
+                </button>
+              );
+            })}
+          </div>
         </div>
       </nav>
 
