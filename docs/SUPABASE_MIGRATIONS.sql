@@ -255,7 +255,7 @@ create policy "admin le eventos consumer" on public.consumer_events
 -- D. Triggers: enfileira eventos automaticamente quando pedido muda
 create or replace function public.enqueue_consumer_event()
 returns trigger language plpgsql
-security definer set search_path = public as $$
+security definer set search_path = public, pg_temp as $$
 declare
   v_code text;
   v_full text;
@@ -282,6 +282,25 @@ begin
   end if;
   return new;
 end $$;
+
+drop trigger if exists trg_orders_consumer_event_ins on public.orders;
+create trigger trg_orders_consumer_event_ins
+  after insert on public.orders
+  for each row execute function public.enqueue_consumer_event();
+
+drop trigger if exists trg_orders_consumer_event_upd on public.orders;
+create trigger trg_orders_consumer_event_upd
+  after update of status on public.orders
+  for each row execute function public.enqueue_consumer_event();
+
+-- Se ao criar pedido aparecer:
+-- "new row violates row-level security policy for table consumer_events",
+-- rode este bloco de reparo. Ele garante que o trigger rode com permissões
+-- elevadas do dono da função, e não como usuário anon/authenticated.
+alter function public.enqueue_consumer_event() security definer;
+alter function public.enqueue_consumer_event() set search_path = public, pg_temp;
+alter function public.enqueue_consumer_event() owner to postgres;
+grant execute on function public.enqueue_consumer_event() to anon, authenticated, service_role;
 
 drop trigger if exists trg_orders_consumer_event_ins on public.orders;
 create trigger trg_orders_consumer_event_ins
