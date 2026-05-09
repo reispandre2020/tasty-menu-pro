@@ -413,6 +413,7 @@ function CategoriesDialog({ categories, onSelect }: { categories: Category[]; on
       <DialogContent className="max-w-sm p-0">
         <DialogHeader className="border-b border-border p-4">
           <DialogTitle className="text-center tracking-[0.3em] text-sm">— MENU —</DialogTitle>
+          <DialogDescription className="sr-only">Selecione uma categoria do cardápio</DialogDescription>
         </DialogHeader>
         <div className="max-h-[60vh] overflow-y-auto py-2">
           {categories.map((c) => (
