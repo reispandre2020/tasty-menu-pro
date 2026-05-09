@@ -73,10 +73,40 @@ async function handleStatusChange(request: Request, orderId: string): Promise<Re
   );
 }
 
+async function handleStatusProbe(request: Request, orderId: string): Promise<Response> {
+  const denied = checkConsumerAuth(request);
+  if (denied) return denied;
+
+  if (/^\{orderid\}$/i.test(orderId)) {
+    console.warn("[consumer-status] GET recebido com placeholder literal; verifique se a URL no Consumer usa {orderid}.");
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from("orders")
+    .select("id, status")
+    .eq("id", orderId)
+    .maybeSingle();
+
+  if (error) {
+    return new Response(JSON.stringify({ statusCode: 500, reasonPhrase: error.message }), {
+      status: 500, headers: { "content-type": "application/json", ...CORS_HEADERS },
+    });
+  }
+
+  return new Response(
+    JSON.stringify({
+      statusCode: 0,
+      reasonPhrase: data ? `${data.id} está como '${data.status}'.` : `${orderId} validado sem alteração de status.`,
+    }),
+    { status: 200, headers: { "content-type": "application/json", ...CORS_HEADERS } },
+  );
+}
+
 export const Route = createFileRoute("/api/consumer/orders/$id/status")({
   server: {
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: CORS_HEADERS }),
+      GET: async ({ request, params }) => handleStatusProbe(request, params.id),
       PATCH: async ({ request, params }) => handleStatusChange(request, params.id),
       POST: async ({ request, params }) => handleStatusChange(request, params.id),
     },
