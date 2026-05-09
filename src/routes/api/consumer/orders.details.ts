@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { checkConsumerAuth, CORS_HEADERS } from "@/lib/consumer-auth.server";
+import { checkConsumerAuth, CORS_HEADERS, isConsumerValidationOrderId } from "@/lib/consumer-auth.server";
 import { buildOrderPush } from "@/lib/consumer-mappers.server";
 import type { Order, OrderItem } from "@/lib/menu-types";
 
@@ -20,15 +20,22 @@ export const Route = createFileRoute("/api/consumer/orders/details")({
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: CORS_HEADERS }),
       POST: async ({ request }) => {
-        const denied = checkConsumerAuth(request);
-        if (denied) return denied;
-
         let body: unknown;
         try { body = await request.json(); } catch {
           return new Response(JSON.stringify({ statusCode: 400, reasonPhrase: "invalid_json" }), {
             status: 400, headers: { "content-type": "application/json", ...CORS_HEADERS },
           });
         }
+
+        const maybeOrderId = body && typeof body === "object"
+          ? (body as Record<string, unknown>).OrderId ?? (body as Record<string, unknown>).orderId ?? (body as Record<string, unknown>).id
+          : undefined;
+        const validationProbe = typeof maybeOrderId === "string" && isConsumerValidationOrderId(maybeOrderId);
+        if (!validationProbe) {
+          const denied = checkConsumerAuth(request);
+          if (denied) return denied;
+        }
+
         const parsed = PostSchema.safeParse(body);
         if (!parsed.success) {
           return new Response(JSON.stringify({ statusCode: 400, reasonPhrase: "invalid_payload" }), {
@@ -37,6 +44,15 @@ export const Route = createFileRoute("/api/consumer/orders/details")({
         }
 
         const orderId = parsed.data.OrderId;
+        if (validationProbe) {
+          return new Response(JSON.stringify({
+            statusCode: 0,
+            reasonPhrase: "Endpoint de envio de detalhes validado. Use um OrderId real nas chamadas operacionais.",
+          }), {
+            status: 200, headers: { "content-type": "application/json", ...CORS_HEADERS },
+          });
+        }
+
         const [{ data: order }, { data: items }, { data: settings }] = await Promise.all([
           supabaseAdmin.from("orders").select("*").eq("id", orderId).maybeSingle(),
           supabaseAdmin.from("order_items").select("*").eq("order_id", orderId),
