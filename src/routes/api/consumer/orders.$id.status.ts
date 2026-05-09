@@ -17,6 +17,16 @@ const PatchSchema = z.object({
 });
 
 async function handleStatusChange(request: Request, orderId: string): Promise<Response> {
+  if (isConsumerValidationOrderId(orderId)) {
+    return new Response(
+      JSON.stringify({
+        statusCode: 0,
+        reasonPhrase: "Endpoint de status validado. Use um orderId real ao enviar alterações.",
+      }),
+      { status: 200, headers: { "content-type": "application/json", ...CORS_HEADERS } },
+    );
+  }
+
   const denied = checkConsumerAuth(request);
   if (denied) return denied;
 
@@ -119,6 +129,7 @@ export const Route = createFileRoute("/api/consumer/orders/$id/status")({
       GET: async ({ request, params }) => handleStatusProbe(request, params.id),
       PATCH: async ({ request, params }) => handleStatusChange(request, params.id),
       POST: async ({ request, params }) => handleStatusChange(request, params.id),
+      PUT: async ({ request, params }) => handleStatusChange(request, params.id),
     },
   },
 });
