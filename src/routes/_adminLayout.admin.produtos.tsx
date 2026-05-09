@@ -10,8 +10,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
+import * as XLSX from "xlsx";
+import { useServerFn } from "@tanstack/react-start";
+import { importProductsXlsx } from "@/lib/products-import.functions";
 
 export const Route = createFileRoute("/_adminLayout/admin/produtos")({
   component: ProductsAdmin,
@@ -82,7 +85,10 @@ function ProductsAdmin() {
           <h1 className="font-display text-3xl">Produtos</h1>
           <p className="text-sm text-muted-foreground">{products.length} produto(s)</p>
         </div>
-        <Button onClick={newOne}><Plus className="mr-2 h-4 w-4" /> Novo</Button>
+        <div className="flex gap-2">
+          <ImportXlsxButton onDone={load} />
+          <Button onClick={newOne}><Plus className="mr-2 h-4 w-4" /> Novo</Button>
+        </div>
       </div>
 
       <div className="grid gap-3">
@@ -170,5 +176,126 @@ function ProductsAdmin() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+type ImportResult = Awaited<ReturnType<typeof importProductsXlsx>>;
+
+function ImportXlsxButton({ onDone }: { onDone: () => void }) {
+  const importFn = useServerFn(importProductsXlsx);
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<ImportResult | null>(null);
+  const [open, setOpen] = useState(false);
+
+  async function handleFile(file: File) {
+    setBusy(true);
+    try {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: "array" });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: null, raw: true });
+      if (rows.length === 0) {
+        toast.error("Planilha vazia");
+        return;
+      }
+      const res = await importFn({ data: { rows: rows as never } });
+      setResult(res);
+      setOpen(true);
+      if (res.inserted > 0) toast.success(`${res.inserted} produto(s) importado(s)`);
+      if (res.errors.length > 0) toast.warning(`${res.errors.length} linha(s) com erro`);
+      onDone();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao importar");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function downloadTemplate() {
+    const ws = XLSX.utils.json_to_sheet([
+      {
+        name: "X-Burger",
+        description: "Pão, hambúrguer, queijo",
+        price: 18.9,
+        categoria: "Lanches",
+        external_code: "100",
+        is_available: true,
+        sort_order: 1,
+        image_url: "https://...",
+        // exemplo de campo extra (vai para extra_fields automaticamente)
+        ingredientes: "pão, carne, queijo",
+        peso_g: 220,
+      },
+    ]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "produtos");
+    XLSX.writeFile(wb, "modelo-produtos.xlsx");
+  }
+
+  return (
+    <>
+      <Button variant="outline" onClick={downloadTemplate} type="button">
+        <FileSpreadsheet className="mr-2 h-4 w-4" /> Modelo
+      </Button>
+      <Button asChild variant="outline" disabled={busy}>
+        <label className="cursor-pointer">
+          <Upload className="mr-2 h-4 w-4" />
+          {busy ? "Importando..." : "Importar XLSX"}
+          <input
+            type="file"
+            accept=".xlsx,.xls,.csv"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleFile(f);
+              e.target.value = "";
+            }}
+          />
+        </label>
+      </Button>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader><DialogTitle>Resultado da importação</DialogTitle></DialogHeader>
+          {result && (
+            <div className="space-y-3 text-sm">
+              <p><strong>{result.inserted}</strong> de {result.total} produto(s) inseridos.</p>
+              {result.newCategories.length > 0 && (
+                <p className="text-muted-foreground">Categorias criadas: {result.newCategories.join(", ")}</p>
+              )}
+              {result.newColumns.length > 0 && (
+                <div>
+                  <p className="font-medium">Campos extras detectados ({result.newColumns.length}):</p>
+                  <p className="text-xs text-muted-foreground">
+                    {result.newColumns.join(", ")}
+                  </p>
+                  <p className="mt-1 text-xs">
+                    {result.extraFieldsAvailable
+                      ? "Salvos automaticamente em products.extra_fields (JSONB)."
+                      : "⚠️ Coluna extra_fields ausente. Estes campos foram ignorados."}
+                  </p>
+                </div>
+              )}
+              {!result.extraFieldsAvailable && result.hint && (
+                <pre className="rounded bg-muted p-2 text-xs overflow-x-auto">{result.hint}</pre>
+              )}
+              {result.errors.length > 0 && (
+                <div>
+                  <p className="font-medium text-destructive">Erros ({result.errors.length}):</p>
+                  <ul className="max-h-40 overflow-y-auto text-xs">
+                    {result.errors.map((e, i) => (
+                      <li key={i}>Linha {e.row}: {e.message}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={() => setOpen(false)}>Fechar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
