@@ -2,8 +2,16 @@ import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { checkConsumerAuth, CORS_HEADERS } from "@/lib/consumer-auth.server";
 
-// GET /api/consumer/orders?status=pending&since=ISO
-// Polling para o Consumer puxar pedidos novos / atualizados.
+// GET /api/consumer/orders — POLLING DE EVENTOS (formato oficial Consumer).
+// Retorna eventos não-lidos e os marca como acknowledged. Aceita ?ack=false
+// para dry-run (não marca).
+//
+// Resposta:
+// {
+//   "items": [{ id, orderId, createdAt, fullCode, code }],
+//   "statusCode": 0,
+//   "reasonPhrase": null
+// }
 export const Route = createFileRoute("/api/consumer/orders")({
   server: {
     handlers: {
@@ -13,24 +21,42 @@ export const Route = createFileRoute("/api/consumer/orders")({
         if (denied) return denied;
 
         const url = new URL(request.url);
-        const status = url.searchParams.get("status");
-        const since = url.searchParams.get("since");
+        const ack = url.searchParams.get("ack") !== "false";
         const limit = Math.min(parseInt(url.searchParams.get("limit") ?? "50", 10) || 50, 200);
 
-        let q = supabaseAdmin
-          .from("orders")
-          .select("id, short_code, mode, status, customer_name, customer_phone, customer_address, table_number, notes, subtotal, delivery_fee, total, payment_method, consumer_external_id, created_at, updated_at")
-          .order("created_at", { ascending: false })
+        const { data, error } = await supabaseAdmin
+          .from("consumer_events")
+          .select("id, order_id, code, full_code, created_at")
+          .is("acknowledged_at", null)
+          .order("created_at", { ascending: true })
           .limit(limit);
-        if (status) q = q.eq("status", status);
-        if (since) q = q.gte("updated_at", since);
 
-        const { data, error } = await q;
-        if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { "content-type": "application/json", ...CORS_HEADERS } });
-        return new Response(JSON.stringify({ orders: data ?? [], count: data?.length ?? 0 }), {
-          status: 200,
-          headers: { "content-type": "application/json", ...CORS_HEADERS },
-        });
+        if (error) {
+          return new Response(
+            JSON.stringify({ items: [], statusCode: 500, reasonPhrase: error.message }),
+            { status: 500, headers: { "content-type": "application/json", ...CORS_HEADERS } },
+          );
+        }
+
+        const items = (data ?? []).map((e) => ({
+          id: e.id,
+          orderId: e.order_id,
+          createdAt: e.created_at,
+          fullCode: e.full_code,
+          code: e.code,
+        }));
+
+        if (ack && items.length > 0) {
+          await supabaseAdmin
+            .from("consumer_events")
+            .update({ acknowledged_at: new Date().toISOString() })
+            .in("id", items.map((i) => i.id));
+        }
+
+        return new Response(
+          JSON.stringify({ items, statusCode: 0, reasonPhrase: null }),
+          { status: 200, headers: { "content-type": "application/json", ...CORS_HEADERS } },
+        );
       },
     },
   },

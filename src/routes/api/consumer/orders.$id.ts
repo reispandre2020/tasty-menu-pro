@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { checkConsumerAuth, CORS_HEADERS } from "@/lib/consumer-auth.server";
+import { buildOrderDetails } from "@/lib/consumer-mappers.server";
+import type { Order, OrderItem } from "@/lib/menu-types";
 
-// GET /api/consumer/orders/:id — detalhes (header + itens)
+// GET /api/consumer/orders/:id — detalhes do pedido no formato oficial Consumer
 export const Route = createFileRoute("/api/consumer/orders/$id")({
   server: {
     handlers: {
@@ -11,18 +13,50 @@ export const Route = createFileRoute("/api/consumer/orders/$id")({
         const denied = checkConsumerAuth(request);
         if (denied) return denied;
 
-        const { data: order, error } = await supabaseAdmin
-          .from("orders")
-          .select("*")
-          .eq("id", params.id)
-          .maybeSingle();
-        if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { "content-type": "application/json", ...CORS_HEADERS } });
-        if (!order) return new Response(JSON.stringify({ error: "not_found" }), { status: 404, headers: { "content-type": "application/json", ...CORS_HEADERS } });
-        const { data: items } = await supabaseAdmin
-          .from("order_items")
-          .select("*")
-          .eq("order_id", params.id);
-        return new Response(JSON.stringify({ order, items: items ?? [] }), {
+        const [{ data: order, error }, { data: items }, { data: settings }] = await Promise.all([
+          supabaseAdmin.from("orders").select("*").eq("id", params.id).maybeSingle(),
+          supabaseAdmin.from("order_items").select("*").eq("order_id", params.id),
+          supabaseAdmin.from("store_settings").select("consumer_merchant_id, store_name").limit(1).maybeSingle(),
+        ]);
+
+        if (error) {
+          return new Response(JSON.stringify({ statusCode: 500, reasonPhrase: error.message }), {
+            status: 500, headers: { "content-type": "application/json", ...CORS_HEADERS },
+          });
+        }
+        if (!order) {
+          return new Response(JSON.stringify({ statusCode: 404, reasonPhrase: "not_found" }), {
+            status: 404, headers: { "content-type": "application/json", ...CORS_HEADERS },
+          });
+        }
+
+        // Carrega externalCode dos produtos
+        const productIds = (items ?? []).map((it) => it.product_id).filter(Boolean) as string[];
+        const productMap = new Map<string, string | null>();
+        if (productIds.length > 0) {
+          const { data: prods } = await supabaseAdmin
+            .from("products")
+            .select("id, external_code")
+            .in("id", productIds);
+          (prods ?? []).forEach((p) => productMap.set(p.id, p.external_code));
+        }
+        const itemsWithCode = (items as OrderItem[]).map((it) => ({
+          ...it,
+          external_code: it.product_id ? productMap.get(it.product_id) ?? null : null,
+        }));
+
+        const merchant = {
+          id: settings?.consumer_merchant_id ?? "",
+          name: settings?.store_name ?? "",
+        };
+        const payload = buildOrderDetails(order as Order, itemsWithCode, merchant);
+        // Inclui externalCode em cada item retornado
+        payload.item.items = payload.item.items.map((it, idx) => ({
+          ...it,
+          externalCode: itemsWithCode[idx]?.external_code ?? "",
+        }));
+
+        return new Response(JSON.stringify(payload), {
           status: 200,
           headers: { "content-type": "application/json", ...CORS_HEADERS },
         });
