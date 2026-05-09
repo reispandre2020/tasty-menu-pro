@@ -360,3 +360,69 @@ function CartTrigger({ itemCount, total, fullWidth }: { itemCount: number; total
     </Sheet>
   );
 }
+
+function SideMenu({ storeName, initial }: { storeName: string; initial: string }) {
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button size="icon" variant="ghost" className="h-10 w-10 rounded-full bg-background/20 text-white hover:bg-background/30 backdrop-blur" aria-label="Abrir menu">
+          <MenuIcon className="h-5 w-5" />
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-72 p-0">
+        <div className="flex items-center gap-3 border-b border-border p-4">
+          <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-primary to-primary-glow text-primary-foreground font-display">
+            {initial}
+          </div>
+          <SheetTitle className="text-base font-semibold truncate">{storeName}</SheetTitle>
+        </div>
+        <nav className="flex flex-col py-2">
+          <Link to="/entrar" className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted">
+            <LogIn className="h-5 w-5 text-primary" /> Entrar
+          </Link>
+          <Link to="/" className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted">
+            <UtensilsCrossed className="h-5 w-5 text-primary" /> Cardápio
+          </Link>
+          <Link to="/cupons" className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted">
+            <Percent className="h-5 w-5 text-primary" /> Cupons de Desconto
+          </Link>
+          <Link to="/sobre" className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted">
+            <Info className="h-5 w-5 text-primary" /> Sobre Nós
+          </Link>
+        </nav>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function CategoriesDialog({ categories, onSelect }: { categories: Category[]; onSelect: (id: string) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="icon" variant="ghost" className="h-10 w-10 shrink-0" aria-label="Ver todas categorias">
+          <MoreVertical className="h-5 w-5" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-sm p-0">
+        <DialogHeader className="border-b border-border p-4">
+          <DialogTitle className="text-center tracking-[0.3em] text-sm">— MENU —</DialogTitle>
+        </DialogHeader>
+        <div className="max-h-[60vh] overflow-y-auto py-2">
+          {categories.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => {
+                onSelect(c.id);
+                setOpen(false);
+              }}
+              className="block w-full px-4 py-3 text-center text-sm font-medium uppercase tracking-wide hover:bg-muted"
+            >
+              {c.name}
+            </button>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
