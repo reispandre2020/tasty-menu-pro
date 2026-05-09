@@ -20,6 +20,7 @@ import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminLayoutAdminIndexRouteImport } from './routes/_adminLayout.admin.index'
 import { Route as ApiPublicOrdersRouteImport } from './routes/api/public/orders'
 import { Route as ApiConsumerOrdersRouteImport } from './routes/api/consumer/orders'
+import { Route as ApiConsumerDiagnosticsRouteImport } from './routes/api/consumer/diagnostics'
 import { Route as AdminLayoutAdminProdutosRouteImport } from './routes/_adminLayout.admin.produtos'
 import { Route as AdminLayoutAdminConfiguracoesRouteImport } from './routes/_adminLayout.admin.configuracoes'
 import { Route as AdminLayoutAdminCategoriasRouteImport } from './routes/_adminLayout.admin.categorias'
@@ -82,6 +83,11 @@ const ApiConsumerOrdersRoute = ApiConsumerOrdersRouteImport.update({
   path: '/api/consumer/orders',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiConsumerDiagnosticsRoute = ApiConsumerDiagnosticsRouteImport.update({
+  id: '/api/consumer/diagnostics',
+  path: '/api/consumer/diagnostics',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLayoutAdminProdutosRoute =
   AdminLayoutAdminProdutosRouteImport.update({
     id: '/admin/produtos',
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/admin/categorias': typeof AdminLayoutAdminCategoriasRoute
   '/admin/configuracoes': typeof AdminLayoutAdminConfiguracoesRoute
   '/admin/produtos': typeof AdminLayoutAdminProdutosRoute
+  '/api/consumer/diagnostics': typeof ApiConsumerDiagnosticsRoute
   '/api/consumer/orders': typeof ApiConsumerOrdersRouteWithChildren
   '/api/public/orders': typeof ApiPublicOrdersRouteWithChildren
   '/admin/': typeof AdminLayoutAdminIndexRoute
@@ -153,6 +160,7 @@ export interface FileRoutesByTo {
   '/admin/categorias': typeof AdminLayoutAdminCategoriasRoute
   '/admin/configuracoes': typeof AdminLayoutAdminConfiguracoesRoute
   '/admin/produtos': typeof AdminLayoutAdminProdutosRoute
+  '/api/consumer/diagnostics': typeof ApiConsumerDiagnosticsRoute
   '/api/consumer/orders': typeof ApiConsumerOrdersRouteWithChildren
   '/api/public/orders': typeof ApiPublicOrdersRouteWithChildren
   '/admin': typeof AdminLayoutAdminIndexRoute
@@ -174,6 +182,7 @@ export interface FileRoutesById {
   '/_adminLayout/admin/categorias': typeof AdminLayoutAdminCategoriasRoute
   '/_adminLayout/admin/configuracoes': typeof AdminLayoutAdminConfiguracoesRoute
   '/_adminLayout/admin/produtos': typeof AdminLayoutAdminProdutosRoute
+  '/api/consumer/diagnostics': typeof ApiConsumerDiagnosticsRoute
   '/api/consumer/orders': typeof ApiConsumerOrdersRouteWithChildren
   '/api/public/orders': typeof ApiPublicOrdersRouteWithChildren
   '/_adminLayout/admin/': typeof AdminLayoutAdminIndexRoute
@@ -195,6 +204,7 @@ export interface FileRouteTypes {
     | '/admin/categorias'
     | '/admin/configuracoes'
     | '/admin/produtos'
+    | '/api/consumer/diagnostics'
     | '/api/consumer/orders'
     | '/api/public/orders'
     | '/admin/'
@@ -214,6 +224,7 @@ export interface FileRouteTypes {
     | '/admin/categorias'
     | '/admin/configuracoes'
     | '/admin/produtos'
+    | '/api/consumer/diagnostics'
     | '/api/consumer/orders'
     | '/api/public/orders'
     | '/admin'
@@ -234,6 +245,7 @@ export interface FileRouteTypes {
     | '/_adminLayout/admin/categorias'
     | '/_adminLayout/admin/configuracoes'
     | '/_adminLayout/admin/produtos'
+    | '/api/consumer/diagnostics'
     | '/api/consumer/orders'
     | '/api/public/orders'
     | '/_adminLayout/admin/'
@@ -252,6 +264,7 @@ export interface RootRouteChildren {
   SobreRoute: typeof SobreRoute
   AdminLoginRoute: typeof AdminLoginRoute
   PedidoIdRoute: typeof PedidoIdRoute
+  ApiConsumerDiagnosticsRoute: typeof ApiConsumerDiagnosticsRoute
   ApiConsumerOrdersRoute: typeof ApiConsumerOrdersRouteWithChildren
   ApiPublicOrdersRoute: typeof ApiPublicOrdersRouteWithChildren
 }
@@ -333,6 +346,13 @@ declare module '@tanstack/react-router' {
       path: '/api/consumer/orders'
       fullPath: '/api/consumer/orders'
       preLoaderRoute: typeof ApiConsumerOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/consumer/diagnostics': {
+      id: '/api/consumer/diagnostics'
+      path: '/api/consumer/diagnostics'
+      fullPath: '/api/consumer/diagnostics'
+      preLoaderRoute: typeof ApiConsumerDiagnosticsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_adminLayout/admin/produtos': {
@@ -450,6 +470,7 @@ const rootRouteChildren: RootRouteChildren = {
   SobreRoute: SobreRoute,
   AdminLoginRoute: AdminLoginRoute,
   PedidoIdRoute: PedidoIdRoute,
+  ApiConsumerDiagnosticsRoute: ApiConsumerDiagnosticsRoute,
   ApiConsumerOrdersRoute: ApiConsumerOrdersRouteWithChildren,
   ApiPublicOrdersRoute: ApiPublicOrdersRouteWithChildren,
 }
