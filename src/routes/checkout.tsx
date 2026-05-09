@@ -512,6 +512,7 @@ function CheckoutPage() {
       <Dialog open={showChangeDialog} onOpenChange={setShowChangeDialog}>
         <DialogContent className="max-w-md">
           <DialogTitle>Preciso de troco para:</DialogTitle>
+          <DialogDescription className="sr-only">Informe o valor para o qual você precisa de troco.</DialogDescription>
           <Input
             inputMode="numeric"
             placeholder="R$ 0,00"
