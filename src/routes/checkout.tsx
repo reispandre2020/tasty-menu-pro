@@ -496,6 +496,7 @@ function CheckoutPage() {
       <Dialog open={showMap} onOpenChange={setShowMap}>
         <DialogContent className="max-w-md p-0 overflow-hidden">
           <DialogTitle className="sr-only">Confirmar localização</DialogTitle>
+          <DialogDescription className="sr-only">Ajuste ou confirme o endereço de entrega no mapa.</DialogDescription>
           <MapConfirm
             address={pendingMapAddress}
             onAdjust={() => {
