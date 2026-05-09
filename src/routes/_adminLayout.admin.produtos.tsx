@@ -10,8 +10,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
+import * as XLSX from "xlsx";
+import { useServerFn } from "@tanstack/react-start";
+import { importProductsXlsx } from "@/lib/products-import.functions";
 
 export const Route = createFileRoute("/_adminLayout/admin/produtos")({
   component: ProductsAdmin,
@@ -82,7 +85,10 @@ function ProductsAdmin() {
           <h1 className="font-display text-3xl">Produtos</h1>
           <p className="text-sm text-muted-foreground">{products.length} produto(s)</p>
         </div>
-        <Button onClick={newOne}><Plus className="mr-2 h-4 w-4" /> Novo</Button>
+        <div className="flex gap-2">
+          <ImportXlsxButton onDone={load} />
+          <Button onClick={newOne}><Plus className="mr-2 h-4 w-4" /> Novo</Button>
+        </div>
       </div>
 
       <div className="grid gap-3">
