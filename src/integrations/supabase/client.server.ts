@@ -5,11 +5,14 @@ let _admin: SupabaseClient | null = null;
 
 function getAdmin(): SupabaseClient {
   if (_admin) return _admin;
-  const url = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-  const key = process.env.SB_SERVICE_ROLE_KEY;
+  const url =
+    process.env.SUPABASE_URL ||
+    process.env.VITE_SUPABASE_URL ||
+    "https://wpgblkvhktecscgxmxou.supabase.co";
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SB_SERVICE_ROLE_KEY;
   if (!url || !key) {
     throw new Error(
-      "Supabase admin env missing: set VITE_SUPABASE_URL and SB_SERVICE_ROLE_KEY",
+      "Supabase admin env missing: set SUPABASE_SERVICE_ROLE_KEY or SB_SERVICE_ROLE_KEY",
     );
   }
   _admin = createClient(url, key, {
