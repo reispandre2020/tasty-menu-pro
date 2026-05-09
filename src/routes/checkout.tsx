@@ -309,61 +309,48 @@ function CheckoutPage() {
         ? Number(changeFor.replace(/\D/g, "")) / 100
         : null;
 
-    const { data: order, error } = await supabase
-      .from("orders")
-      .insert({
+    const response = await fetch("/api/public/orders", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
         mode,
-        status: "pending",
-        customer_name: name.trim(),
-        customer_phone: phone.replace(/\D/g, ""),
-        customer_address: customerAddr,
-        customer_document: cpf.trim() || null,
-        table_number: null,
+        customer: {
+          name: name.trim(),
+          phone,
+          document: cpf.trim() || null,
+        },
+        address: mode === "delivery" ? {
+          formatted: customerAddr,
+          zip: address.cep,
+          state: address.uf,
+          city: address.cidade,
+          neighborhood: address.bairro,
+          street: address.endereco,
+          number: address.semNumero ? "S/N" : address.numero,
+          complement: !address.semCompl ? address.complemento || null : null,
+          reference: address.referencia || null,
+        } : null,
+        paymentMethod,
+        changeFor: changeForValue,
         notes: finalNotes,
-        subtotal,
-        delivery_fee: deliveryFee,
-        total,
-        payment_method: paymentMethod,
-        change_for: changeForValue,
-        // endereço estruturado (obrigatório para integração Consumer)
-        address_zip: mode === "delivery" ? address.cep.replace(/\D/g, "") || null : null,
-        address_state: mode === "delivery" ? address.uf || null : null,
-        address_city: mode === "delivery" ? address.cidade || null : null,
-        address_neighborhood: mode === "delivery" ? address.bairro || null : null,
-        address_street: mode === "delivery" ? address.endereco || null : null,
-        address_number: mode === "delivery" ? (address.semNumero ? "S/N" : address.numero) || null : null,
-        address_complement: mode === "delivery" && !address.semCompl ? address.complemento || null : null,
-        address_reference: mode === "delivery" ? address.referencia || null : null,
-      })
-      .select("id, short_code")
-      .single();
+        items: cart.items.map((i) => ({
+          productId: i.productId,
+          quantity: i.quantity,
+          notes: i.notes ?? null,
+        })),
+      }),
+    });
 
-    if (error || !order) {
-      console.error("[checkout] insert order failed:", error);
-      const msg = error?.message ?? "Erro desconhecido";
+    const result = await response.json().catch(() => null) as { order?: { id: string; short_code: string }; error?: string } | null;
+    if (!response.ok || !result?.order) {
+      const msg = result?.error ?? "Erro desconhecido";
       toast.error(`Erro ao criar pedido: ${msg}`);
       setSubmitting(false);
       return;
     }
 
-    const items = cart.items.map((i) => ({
-      order_id: order.id,
-      product_id: i.productId,
-      product_name: i.name,
-      unit_price: i.price,
-      quantity: i.quantity,
-      notes: i.notes ?? null,
-      subtotal: i.price * i.quantity,
-    }));
-    const { error: itErr } = await supabase.from("order_items").insert(items);
-    if (itErr) {
-      toast.error("Erro ao salvar itens.");
-      setSubmitting(false);
-      return;
-    }
-
     cartStore.clear();
-    nav({ to: "/pedido/$id", params: { id: order.id } });
+    nav({ to: "/pedido/$id", params: { id: result.order.id } });
   }
 
   const stepTitle: Record<Step, string> = {
