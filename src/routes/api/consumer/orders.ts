@@ -17,19 +17,8 @@ export const Route = createFileRoute("/api/consumer/orders")({
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: CORS_HEADERS }),
       GET: async ({ request }) => {
-        // TESTE TEMPORÁRIO: auth desabilitada para diagnosticar se o Consumer
-        // está chamando o endpoint. Logamos os headers que chegam para
-        // identificar o formato do token usado pelo painel.
-        const debugHeaders: Record<string, string> = {};
-        request.headers.forEach((v, k) => {
-          debugHeaders[k] = v.length > 40 ? `${v.slice(0, 8)}…${v.slice(-4)} (len=${v.length})` : v;
-        });
-        console.log("[consumer-orders][TEST-NO-AUTH] chamada recebida", JSON.stringify({
-          url: request.url,
-          headers: debugHeaders,
-        }));
-        // const denied = checkConsumerAuth(request);
-        // if (denied) return denied;
+        const denied = checkConsumerAuth(request);
+        if (denied) return denied;
 
         const url = new URL(request.url);
         const ack = url.searchParams.get("ack") !== "false";
